@@ -24,16 +24,32 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Build and Publish
-      run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish
+    - name: Build and Publish (Single EXE)
+      run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
       
-    - name: Create ZIP archive
-      run: Compress-Archive -Path .\publish\* -DestinationPath FACTOVA_Execute_${{ github.ref_name }}_win-x64.zip
+    - name: Rename EXE file
+      run: |
+        $tagName = "${{ github.ref_name }}"
+        Move-Item -Path ".\publish\FACTOVA_Execute.exe" -Destination ".\FACTOVA_Execute_$tagName.exe"
       
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: FACTOVA_Execute_${{ github.ref_name }}_win-x64.zip
+        files: FACTOVA_Execute_${{ github.ref_name }}.exe
         generate_release_notes: true
+        body: |
+          ## FACTOVA Execute ${{ github.ref_name }}
+          
+          ### 다운로드
+          단일 실행 파일을 다운로드하여 바로 사용하세요.
+          
+          ### 설치 방법
+          1. `FACTOVA_Execute_${{ github.ref_name }}.exe` 다운로드
+          2. 다운로드한 파일을 원하는 위치에 저장
+          3. 더블클릭하여 실행
+          
+          ### 주의사항
+          - .NET 8 런타임이 포함되어 있어 별도 설치가 필요 없습니다.
+          - 첫 실행 시 압축 해제로 인해 약간의 시간이 소요될 수 있습니다.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
