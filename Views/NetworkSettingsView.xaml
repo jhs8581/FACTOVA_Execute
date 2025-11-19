@@ -7,6 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <!-- Boolean Inverter Converter -->
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        
         <Style x:Key="SaveButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#007BFF"/>
             <Setter Property="Foreground" Value="White"/>
@@ -99,7 +102,8 @@
                         <ComboBox Grid.Column="1" 
                                   x:Name="CheckTypeComboBox"
                                   Height="30"
-                                  VerticalContentAlignment="Center">
+                                  VerticalContentAlignment="Center"
+                                  SelectionChanged="CheckTypeComboBox_SelectionChanged">
                             <ComboBoxItem Content="Ping" IsSelected="True"/>
                             <ComboBoxItem Content="HTTP"/>
                             <ComboBoxItem Content="TCP"/>
@@ -113,7 +117,8 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="대상 주소 (우선순위):" 
+                                   x:Name="AddressLabelTextBlock"
+                                   Text="Ping 주소 (우선순위):" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Top"
@@ -125,7 +130,8 @@
                                      AcceptsReturn="True"
                                      VerticalScrollBarVisibility="Auto"
                                      Padding="5"/>
-                            <TextBlock Text="* 한 줄에 하나씩 입력 (우선순위 순서대로)" 
+                            <TextBlock x:Name="AddressHintTextBlock"
+                                       Text="* 한 줄에 하나씩 입력 (우선순위 순서대로)" 
                                        FontSize="11" 
                                        Foreground="#6C757D"
                                        Margin="0,5,0,0"/>
@@ -241,13 +247,14 @@
                                        FontWeight="Bold"
                                        Foreground="#856404"
                                        Margin="0,0,0,5"/>
-                            <TextBlock TextWrapping="Wrap" 
+                            <TextBlock x:Name="ExampleTextBlock"
+                                       TextWrapping="Wrap" 
                                        Foreground="#856404"
                                        FontSize="12">
                                 <Run Text="• 여러 게이트웨이를 등록하면 순서대로 확인합니다."/><LineBreak/>
                                 <Run Text="• 하나라도 연결되면 네트워크 연결 성공으로 판단합니다."/><LineBreak/>
                                 <Run Text="• 모두 실패하면 지정한 시간(재시도 대기시간) 후 다시 시도합니다."/><LineBreak/><LineBreak/>
-                                <Run Text="예시 게이트웨이 주소:"/><LineBreak/>
+                                <Run Text="예시 Ping 주소:"/><LineBreak/>
                                 <Run Text="165.186.55.129"/><LineBreak/>
                                 <Run Text="10.162.190.1"/><LineBreak/>
                                 <Run Text="165.186.47.1"/><LineBreak/>

@@ -37,7 +37,9 @@ namespace FACTOVA_Execute.Data
                 CREATE TABLE IF NOT EXISTS NetworkSettings (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     CheckType TEXT NOT NULL DEFAULT 'Ping',
-                    TargetAddresses TEXT NOT NULL,
+                    PingAddresses TEXT NOT NULL DEFAULT '',
+                    HttpAddresses TEXT NOT NULL DEFAULT '',
+                    TcpAddresses TEXT NOT NULL DEFAULT '',
                     Port INTEGER NOT NULL DEFAULT 80,
                     TimeoutMs INTEGER NOT NULL DEFAULT 3000,
                     CheckIntervalSeconds INTEGER NOT NULL DEFAULT 30,
@@ -122,73 +124,45 @@ namespace FACTOVA_Execute.Data
                 }
                 reader.Close();
 
-                // TargetAddresses 컬럼이 없으면 마이그레이션 필요
-                if (!columns.Contains("TargetAddresses"))
+                // PingAddresses, HttpAddresses, TcpAddresses 컬럼 추가
+                if (!columns.Contains("PingAddresses"))
                 {
-                    // 기존 데이터 백업
-                    command.CommandText = @"
-                        CREATE TABLE IF NOT EXISTS NetworkSettings_backup AS 
-                        SELECT * FROM NetworkSettings";
-                    command.ExecuteNonQuery();
-
-                    // 기존 테이블 삭제
-                    command.CommandText = "DROP TABLE IF EXISTS NetworkSettings";
-                    command.ExecuteNonQuery();
-
-                    // 새 구조로 테이블 재생성
-                    command.CommandText = @"
-                        CREATE TABLE NetworkSettings (
-                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            CheckType TEXT NOT NULL DEFAULT 'Ping',
-                            TargetAddresses TEXT NOT NULL,
-                            Port INTEGER NOT NULL DEFAULT 80,
-                            TimeoutMs INTEGER NOT NULL DEFAULT 3000,
-                            CheckIntervalSeconds INTEGER NOT NULL DEFAULT 30,
-                            RetryDelaySeconds INTEGER NOT NULL DEFAULT 10,
-                            AutoStartPrograms INTEGER NOT NULL DEFAULT 1
-                        );
-                    ";
-                    command.ExecuteNonQuery();
-
-                    // 백업에서 데이터 복원 시도
-                    try
-                    {
-                        command.CommandText = @"
-                            INSERT INTO NetworkSettings 
-                            (CheckType, TargetAddresses, Port, TimeoutMs, CheckIntervalSeconds, RetryDelaySeconds, AutoStartPrograms)
-                            SELECT 
-                                CheckType, 
-                                COALESCE(TargetAddress, '165.186.55.129;10.162.190.1;165.186.47.1;10.162.35.1'), 
-                                Port, 
-                                TimeoutMs, 
-                                CheckIntervalSeconds,
-                                10,
-                                1
-                            FROM NetworkSettings_backup";
-                        command.ExecuteNonQuery();
-                    }
-                    catch
-                    {
-                        // 복원 실패시 무시 (InitializeDefaultNetworkSettings에서 처리)
-                    }
-
-                    // 백업 테이블 삭제
-                    command.CommandText = "DROP TABLE IF EXISTS NetworkSettings_backup";
+                    command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN PingAddresses TEXT NOT NULL DEFAULT ''";
                     command.ExecuteNonQuery();
                 }
-                // RetryDelaySeconds 또는 AutoStartPrograms 컬럼이 없으면 추가
-                else if (!columns.Contains("RetryDelaySeconds") || !columns.Contains("AutoStartPrograms"))
+                if (!columns.Contains("HttpAddresses"))
                 {
-                    if (!columns.Contains("RetryDelaySeconds"))
-                    {
-                        command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN RetryDelaySeconds INTEGER NOT NULL DEFAULT 10";
-                        command.ExecuteNonQuery();
-                    }
-                    if (!columns.Contains("AutoStartPrograms"))
-                    {
-                        command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN AutoStartPrograms INTEGER NOT NULL DEFAULT 1";
-                        command.ExecuteNonQuery();
-                    }
+                    command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN HttpAddresses TEXT NOT NULL DEFAULT ''";
+                    command.ExecuteNonQuery();
+                }
+                if (!columns.Contains("TcpAddresses"))
+                {
+                    command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN TcpAddresses TEXT NOT NULL DEFAULT ''";
+                    command.ExecuteNonQuery();
+                }
+
+                // 기존 TargetAddresses 데이터를 PingAddresses로 마이그레이션
+                if (columns.Contains("TargetAddresses"))
+                {
+                    command.CommandText = @"
+                        UPDATE NetworkSettings 
+                        SET PingAddresses = TargetAddresses 
+                        WHERE PingAddresses = '' AND TargetAddresses != ''";
+                    command.ExecuteNonQuery();
+                }
+
+                // UseSequentialCheck 컬럼 제거는 나중에 (하위 호환성)
+                
+                // RetryDelaySeconds 또는 AutoStartPrograms 컬럼이 없으면 추가
+                if (!columns.Contains("RetryDelaySeconds"))
+                {
+                    command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN RetryDelaySeconds INTEGER NOT NULL DEFAULT 10";
+                    command.ExecuteNonQuery();
+                }
+                if (!columns.Contains("AutoStartPrograms"))
+                {
+                    command.CommandText = "ALTER TABLE NetworkSettings ADD COLUMN AutoStartPrograms INTEGER NOT NULL DEFAULT 1";
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -242,14 +216,18 @@ namespace FACTOVA_Execute.Data
             if (count == 0)
             {
                 // 배치파일과 동일한 게이트웨이 순서
-                var defaultAddresses = "165.186.55.129;10.162.190.1;165.186.47.1;10.162.35.1";
+                var defaultPingAddresses = "165.186.55.129;10.162.190.1;165.186.47.1;10.162.35.1";
+                var defaultHttpAddresses = "http://google.com;http://naver.com";
+                var defaultTcpAddresses = "165.186.55.129;10.162.190.1";
                 
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                    INSERT INTO NetworkSettings (CheckType, TargetAddresses, Port, TimeoutMs, CheckIntervalSeconds, RetryDelaySeconds, AutoStartPrograms) 
-                    VALUES (@checkType, @targetAddresses, @port, @timeoutMs, @checkIntervalSeconds, @retryDelaySeconds, @autoStartPrograms)";
+                    INSERT INTO NetworkSettings (CheckType, PingAddresses, HttpAddresses, TcpAddresses, Port, TimeoutMs, CheckIntervalSeconds, RetryDelaySeconds, AutoStartPrograms) 
+                    VALUES (@checkType, @pingAddresses, @httpAddresses, @tcpAddresses, @port, @timeoutMs, @checkIntervalSeconds, @retryDelaySeconds, @autoStartPrograms)";
                 command.Parameters.AddWithValue("@checkType", "Ping");
-                command.Parameters.AddWithValue("@targetAddresses", defaultAddresses);
+                command.Parameters.AddWithValue("@pingAddresses", defaultPingAddresses);
+                command.Parameters.AddWithValue("@httpAddresses", defaultHttpAddresses);
+                command.Parameters.AddWithValue("@tcpAddresses", defaultTcpAddresses);
                 command.Parameters.AddWithValue("@port", 80);
                 command.Parameters.AddWithValue("@timeoutMs", 3000);
                 command.Parameters.AddWithValue("@checkIntervalSeconds", 30);

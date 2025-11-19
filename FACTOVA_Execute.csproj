@@ -10,9 +10,9 @@
     <ApplicationIcon>Icons\FACTOVA_Execute.ico</ApplicationIcon>
     
     <!-- 버전 정보 -->
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
     <Product>FACTOVA Execute</Product>
     <Company>FACTOVA</Company>
     <Copyright>Copyright © 2025</Copyright>
@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Resource Include="Icons\FACTOVA_Execute.ico" />
+    <None Include=".github\workflows\release.yml" />
     <None Include="Icons\FACTOVA_Execute.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

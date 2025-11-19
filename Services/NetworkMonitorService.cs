@@ -77,55 +77,89 @@ namespace FACTOVA_Execute.Services
             try
             {
                 var settings = _networkRepository.GetSettings();
-                var addresses = settings.TargetAddresses.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                
+                // 모든 체크 타입의 주소 가져오기
+                var allAddresses = settings.GetAllAddresses();
 
-                if (!addresses.Any())
+                // 하나라도 주소가 있는지 확인
+                var hasAnyAddress = allAddresses.Values.Any(list => list.Any());
+                if (!hasAnyAddress)
                 {
-                    LogMessage("등록된 게이트웨이 주소가 없습니다.", LogLevel.Warning);
+                    LogMessage("등록된 주소가 없습니다. 설정에서 주소를 추가해주세요.", LogLevel.Warning);
                     return;
                 }
 
-                LogMessage($"네트워크 연결 확인 중... ({settings.CheckType})", LogLevel.Info);
+                LogMessage("네트워크 연결 확인 중... (Ping, HTTP, TCP 병렬 체크)", LogLevel.Info);
 
                 bool isConnected = false;
                 string? connectedAddress = null;
+                string? connectedMethod = null;
 
-                foreach (var address in addresses)
+                // Ping, HTTP, TCP 순서로 체크
+                foreach (var kvp in allAddresses)
                 {
-                    var trimmedAddress = address.Trim();
-                    LogMessage($"  → {trimmedAddress} 확인 중...", LogLevel.Info);
+                    var checkType = kvp.Key;
+                    var addresses = kvp.Value;
 
-                    bool result = false;
-                    switch (settings.CheckType)
+                    if (!addresses.Any())
                     {
-                        case "Ping":
-                            result = await TestPingAsync(trimmedAddress, settings.TimeoutMs);
-                            break;
-                        case "HTTP":
-                            result = await TestHttpAsync(trimmedAddress, settings.TimeoutMs);
-                            break;
-                        case "TCP":
-                            result = await TestTcpAsync(trimmedAddress, settings.Port, settings.TimeoutMs);
-                            break;
+                        LogMessage($"  [{checkType}] 등록된 주소 없음", LogLevel.Info);
+                        continue;
                     }
 
-                    if (result)
+                    LogMessage($"  [{checkType}] 체크 시작 ({addresses.Count}개 주소)", LogLevel.Info);
+
+                    foreach (var address in addresses)
                     {
-                        isConnected = true;
-                        connectedAddress = trimmedAddress;
-                        LogMessage($"  ✓ {trimmedAddress} 연결 성공!", LogLevel.Success);
+                        LogMessage($"    → {address} 확인 중...", LogLevel.Info);
+
+                        bool result = false;
+                        try
+                        {
+                            switch (checkType)
+                            {
+                                case "Ping":
+                                    result = await TestPingAsync(address, settings.TimeoutMs);
+                                    break;
+                                case "HTTP":
+                                    result = await TestHttpAsync(address, settings.TimeoutMs);
+                                    break;
+                                case "TCP":
+                                    result = await TestTcpAsync(address, settings.Port, settings.TimeoutMs);
+                                    break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogMessage($"    ✗ {address} 오류: {ex.Message}", LogLevel.Warning);
+                            continue;
+                        }
+
+                        if (result)
+                        {
+                            isConnected = true;
+                            connectedAddress = address;
+                            connectedMethod = checkType;
+                            LogMessage($"    ✓ {address} 연결 성공!", LogLevel.Success);
+                            break; // 하나 성공하면 해당 타입은 중단
+                        }
+                        else
+                        {
+                            LogMessage($"    ✗ {address} 연결 실패", LogLevel.Warning);
+                        }
+                    }
+
+                    // 하나라도 성공하면 전체 체크 중단
+                    if (isConnected)
+                    {
                         break;
-                    }
-                    else
-                    {
-                        LogMessage($"  ✗ {trimmedAddress} 연결 실패", LogLevel.Warning);
                     }
                 }
 
                 if (isConnected && !_isNetworkConnected)
                 {
                     _isNetworkConnected = true;
-                    LogMessage($"네트워크 연결됨: {connectedAddress}", LogLevel.Success);
+                    LogMessage($"네트워크 연결됨: {connectedAddress} ({connectedMethod})", LogLevel.Success);
 
                     // 자동 실행 옵션이 켜져있고 아직 실행하지 않았으면 프로그램 실행
                     if (settings.AutoStartPrograms && !_isProgramsStarted)
@@ -148,7 +182,7 @@ namespace FACTOVA_Execute.Services
                 }
                 else if (!isConnected)
                 {
-                    LogMessage($"모든 게이트웨이 연결 실패. {settings.RetryDelaySeconds}초 후 재시도...", LogLevel.Warning);
+                    LogMessage($"모든 주소 연결 실패. {settings.RetryDelaySeconds}초 후 재시도...", LogLevel.Warning);
                     await Task.Delay(settings.RetryDelaySeconds * 1000);
                 }
             }

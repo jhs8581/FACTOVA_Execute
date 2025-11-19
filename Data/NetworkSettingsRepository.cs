@@ -17,7 +17,9 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, CheckType, TargetAddresses, Port, TimeoutMs, CheckIntervalSeconds, RetryDelaySeconds, AutoStartPrograms FROM NetworkSettings LIMIT 1";
+            command.CommandText = @"SELECT Id, CheckType, PingAddresses, HttpAddresses, TcpAddresses, 
+                                    Port, TimeoutMs, CheckIntervalSeconds, RetryDelaySeconds, AutoStartPrograms 
+                                    FROM NetworkSettings LIMIT 1";
 
             using var reader = command.ExecuteReader();
             if (reader.Read())
@@ -26,12 +28,14 @@ namespace FACTOVA_Execute.Data
                 {
                     Id = reader.GetInt32(0),
                     CheckType = reader.GetString(1),
-                    TargetAddresses = reader.GetString(2),
-                    Port = reader.GetInt32(3),
-                    TimeoutMs = reader.GetInt32(4),
-                    CheckIntervalSeconds = reader.GetInt32(5),
-                    RetryDelaySeconds = reader.GetInt32(6),
-                    AutoStartPrograms = reader.GetInt32(7) == 1
+                    PingAddresses = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                    HttpAddresses = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                    TcpAddresses = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                    Port = reader.GetInt32(5),
+                    TimeoutMs = reader.GetInt32(6),
+                    CheckIntervalSeconds = reader.GetInt32(7),
+                    RetryDelaySeconds = reader.GetInt32(8),
+                    AutoStartPrograms = reader.GetInt32(9) == 1
                 };
             }
 
@@ -39,7 +43,9 @@ namespace FACTOVA_Execute.Data
             return new NetworkSettings
             {
                 CheckType = "Ping",
-                TargetAddresses = "165.186.55.129;10.162.190.1;165.186.47.1;10.162.35.1",
+                PingAddresses = "165.186.55.129;10.162.190.1;165.186.47.1;10.162.35.1",
+                HttpAddresses = "http://google.com;http://naver.com",
+                TcpAddresses = "165.186.55.129;10.162.190.1",
                 Port = 80,
                 TimeoutMs = 3000,
                 CheckIntervalSeconds = 30,
@@ -60,7 +66,9 @@ namespace FACTOVA_Execute.Data
             command.CommandText = @"
                 UPDATE NetworkSettings 
                 SET CheckType = @checkType, 
-                    TargetAddresses = @targetAddresses, 
+                    PingAddresses = @pingAddresses,
+                    HttpAddresses = @httpAddresses,
+                    TcpAddresses = @tcpAddresses,
                     Port = @port, 
                     TimeoutMs = @timeoutMs, 
                     CheckIntervalSeconds = @checkIntervalSeconds,
@@ -69,7 +77,9 @@ namespace FACTOVA_Execute.Data
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", settings.Id);
             command.Parameters.AddWithValue("@checkType", settings.CheckType);
-            command.Parameters.AddWithValue("@targetAddresses", settings.TargetAddresses);
+            command.Parameters.AddWithValue("@pingAddresses", settings.PingAddresses);
+            command.Parameters.AddWithValue("@httpAddresses", settings.HttpAddresses);
+            command.Parameters.AddWithValue("@tcpAddresses", settings.TcpAddresses);
             command.Parameters.AddWithValue("@port", settings.Port);
             command.Parameters.AddWithValue("@timeoutMs", settings.TimeoutMs);
             command.Parameters.AddWithValue("@checkIntervalSeconds", settings.CheckIntervalSeconds);
