@@ -1,0 +1,143 @@
+<UserControl x:Class="FACTOVA_Execute.Views.GeneralSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FACTOVA_Execute.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="SaveButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#007BFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#0056B3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="15" Background="#F8F9FA">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 제목 -->
+        <TextBlock Grid.Row="0" 
+                   Text="일반 설정" 
+                   FontSize="22" 
+                   FontWeight="Bold" 
+                   Foreground="#212529"
+                   Margin="0,0,0,15"/>
+
+        <!-- 설정 내용 -->
+        <Border Grid.Row="1" 
+                Background="White" 
+                BorderBrush="#DEE2E6" 
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="20">
+            <StackPanel>
+                <!-- 연결 시 자동 실행 -->
+                <Border BorderBrush="#DEE2E6" 
+                        BorderThickness="0,0,0,1"
+                        Padding="0,0,0,20"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="연결 시 자동 실행" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Foreground="#212529"
+                                   Margin="0,0,0,10"/>
+                        
+                        <CheckBox x:Name="AutoStartMonitoringCheckBox"
+                                  FontSize="14"
+                                  VerticalContentAlignment="Center">
+                            <CheckBox.Content>
+                                <TextBlock TextWrapping="Wrap">
+                                    <Run Text="네트워크 연결 시 자동으로 프로그램 실행" FontWeight="SemiBold"/><LineBreak/>
+                                    <Run Text="프로그램 시작 시 자동으로 네트워크 모니터링을 시작하고, 네트워크가 연결되면 자동으로 등록된 프로그램을 실행합니다." 
+                                         FontSize="12" 
+                                         Foreground="#6C757D"/>
+                                </TextBlock>
+                            </CheckBox.Content>
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- 트레이로 실행 -->
+                <Border Padding="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="프로그램 실행 모드" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Foreground="#212529"
+                                   Margin="0,0,0,10"/>
+                        
+                        <CheckBox x:Name="StartInTrayCheckBox"
+                                  FontSize="14"
+                                  VerticalContentAlignment="Center">
+                            <CheckBox.Content>
+                                <TextBlock TextWrapping="Wrap">
+                                    <Run Text="트레이로 실행" FontWeight="SemiBold"/><LineBreak/>
+                                    <Run Text="프로그램 시작 시 창을 표시하지 않고 시스템 트레이에서 실행합니다. 트레이 아이콘을 더블클릭하면 창이 표시됩니다." 
+                                         FontSize="12" 
+                                         Foreground="#6C757D"/>
+                                </TextBlock>
+                            </CheckBox.Content>
+                        </CheckBox>
+
+                        <Border Background="#FFF3CD" 
+                                BorderBrush="#FFE69C"
+                                BorderThickness="1"
+                                Padding="10"
+                                CornerRadius="3"
+                                Margin="0,15,0,0">
+                            <StackPanel>
+                                <TextBlock Text="⚠️ 주의사항" 
+                                           FontWeight="Bold"
+                                           Foreground="#856404"
+                                           Margin="0,0,0,5"/>
+                                <TextBlock TextWrapping="Wrap" 
+                                           Foreground="#856404"
+                                           FontSize="12"
+                                           Text="'트레이로 실행' 옵션은 프로그램을 다시 시작한 후에 적용됩니다."/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- 저장 버튼 -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,10,0,0">
+            <Button x:Name="SaveButton" 
+                    Content="저장" 
+                    Style="{StaticResource SaveButtonStyle}"
+                    Click="SaveButton_Click"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

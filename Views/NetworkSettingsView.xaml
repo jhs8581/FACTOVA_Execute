@@ -1,0 +1,278 @@
+<UserControl x:Class="FACTOVA_Execute.Views.NetworkSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FACTOVA_Execute.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="SaveButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#007BFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#0056B3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TestButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#28A745"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#218838"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="15" Background="#F8F9FA">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 제목 -->
+        <TextBlock Grid.Row="0" 
+                   Text="네트워크 설정" 
+                   FontSize="22" 
+                   FontWeight="Bold" 
+                   Foreground="#212529"
+                   Margin="0,0,0,15"/>
+
+        <!-- 설정 내용 -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Border Background="White" 
+                    BorderBrush="#DEE2E6" 
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="20">
+                <StackPanel>
+                    <!-- 체크 방식 -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="체크 방식:" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1" 
+                                  x:Name="CheckTypeComboBox"
+                                  Height="30"
+                                  VerticalContentAlignment="Center">
+                            <ComboBoxItem Content="Ping" IsSelected="True"/>
+                            <ComboBoxItem Content="HTTP"/>
+                            <ComboBoxItem Content="TCP"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 대상 주소 (다중) -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="대상 주소 (우선순위):" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Top"
+                                   Margin="0,5,0,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBox x:Name="TargetAddressesTextBox"
+                                     Height="100"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Padding="5"/>
+                            <TextBlock Text="* 한 줄에 하나씩 입력 (우선순위 순서대로)" 
+                                       FontSize="11" 
+                                       Foreground="#6C757D"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 포트 (TCP용) -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="포트 (TCP용):" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" 
+                                 x:Name="PortTextBox"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"
+                                 Padding="5"/>
+                    </Grid>
+
+                    <!-- 타임아웃 -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="타임아웃 (ms):" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" 
+                                 x:Name="TimeoutTextBox"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"
+                                 Padding="5"/>
+                    </Grid>
+
+                    <!-- 재시도 대기시간 -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="재시도 대기시간 (초):" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" 
+                                 x:Name="RetryDelayTextBox"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"
+                                 Padding="5"/>
+                    </Grid>
+
+                    <!-- 체크 주기 -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="체크 주기 (초):" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" 
+                                 x:Name="CheckIntervalTextBox"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"
+                                 Padding="5"/>
+                    </Grid>
+
+                    <!-- 연결 상태 표시 -->
+                    <Border BorderBrush="#DEE2E6" 
+                            BorderThickness="1" 
+                            Background="#E7F3FF"
+                            Padding="10"
+                            CornerRadius="3"
+                            Margin="0,10,0,0">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <TextBlock Text="현재 상태: " 
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock x:Name="StatusTextBlock" 
+                                           Text="확인 안됨" 
+                                           Foreground="#6C757D"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock x:Name="DetailStatusTextBlock" 
+                                       Text="" 
+                                       FontSize="11"
+                                       Foreground="#6C757D"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 설명 -->
+                    <Border Background="#FFF3CD" 
+                            BorderBrush="#FFE69C"
+                            BorderThickness="1"
+                            Padding="10"
+                            CornerRadius="3"
+                            Margin="0,15,0,0">
+                        <StackPanel>
+                            <TextBlock Text="💡 네트워크 확인 방법" 
+                                       FontWeight="Bold"
+                                       Foreground="#856404"
+                                       Margin="0,0,0,5"/>
+                            <TextBlock TextWrapping="Wrap" 
+                                       Foreground="#856404"
+                                       FontSize="12">
+                                <Run Text="• 여러 게이트웨이를 등록하면 순서대로 확인합니다."/><LineBreak/>
+                                <Run Text="• 하나라도 연결되면 네트워크 연결 성공으로 판단합니다."/><LineBreak/>
+                                <Run Text="• 모두 실패하면 지정한 시간(재시도 대기시간) 후 다시 시도합니다."/><LineBreak/><LineBreak/>
+                                <Run Text="예시 게이트웨이 주소:"/><LineBreak/>
+                                <Run Text="165.186.55.129"/><LineBreak/>
+                                <Run Text="10.162.190.1"/><LineBreak/>
+                                <Run Text="165.186.47.1"/><LineBreak/>
+                                <Run Text="10.162.35.1"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+
+        <!-- 버튼 영역 -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,10,0,0">
+            <Button x:Name="TestButton" 
+                    Content="연결 테스트" 
+                    Style="{StaticResource TestButtonStyle}"
+                    Margin="0,0,5,0"
+                    Click="TestButton_Click"/>
+            <Button x:Name="SaveButton" 
+                    Content="저장" 
+                    Style="{StaticResource SaveButtonStyle}"
+                    Click="SaveButton_Click"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

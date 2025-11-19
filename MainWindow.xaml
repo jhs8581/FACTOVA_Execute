@@ -1,0 +1,21 @@
+<Window x:Class="FACTOVA_Execute.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FACTOVA_Execute"
+        xmlns:views="clr-namespace:FACTOVA_Execute.Views"
+        mc:Ignorable="d"
+        Title="FACTOVA Execute" Height="800" Width="800"
+        Icon="Icons/FACTOVA_Execute.ico">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Execute">
+                <views:ExecuteTabView />
+            </TabItem>
+            <TabItem Header="Settings">
+                <views:SettingsTabView />
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
