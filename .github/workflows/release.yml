@@ -27,15 +27,10 @@ jobs:
     - name: Build and Publish (Single EXE)
       run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
       
-    - name: Rename EXE file
-      run: |
-        $tagName = "${{ github.ref_name }}"
-        Move-Item -Path ".\publish\FACTOVA_Execute.exe" -Destination ".\FACTOVA_Execute_$tagName.exe"
-      
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: FACTOVA_Execute_${{ github.ref_name }}.exe
+        files: publish/FACTOVA_Execute.exe
         generate_release_notes: true
         body: |
           ## FACTOVA Execute ${{ github.ref_name }}
@@ -44,7 +39,7 @@ jobs:
           단일 실행 파일을 다운로드하여 바로 사용하세요.
           
           ### 설치 방법
-          1. `FACTOVA_Execute_${{ github.ref_name }}.exe` 다운로드
+          1. `FACTOVA_Execute.exe` 다운로드
           2. 다운로드한 파일을 원하는 위치에 저장
           3. 더블클릭하여 실행
           
