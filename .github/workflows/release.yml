@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build and Publish
+      run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish
+      
+    - name: Create ZIP archive
+      run: Compress-Archive -Path .\publish\* -DestinationPath FACTOVA_Execute_${{ github.ref_name }}_win-x64.zip
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: FACTOVA_Execute_${{ github.ref_name }}_win-x64.zip
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
