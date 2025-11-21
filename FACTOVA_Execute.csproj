@@ -10,9 +10,9 @@
     <ApplicationIcon>Icons\FACTOVA_Execute.ico</ApplicationIcon>
     
     <!-- 버전 정보 -->
-    <Version>1.0.7</Version>
-    <AssemblyVersion>1.0.7.0</AssemblyVersion>
-    <FileVersion>1.0.7.0</FileVersion>
+    <Version>1.0.8</Version>
+    <AssemblyVersion>1.0.8.0</AssemblyVersion>
+    <FileVersion>1.0.8.0</FileVersion>
     <Product>FACTOVA Execute</Product>
     <Company>FACTOVA</Company>
     <Copyright>Copyright © 2025</Copyright>
