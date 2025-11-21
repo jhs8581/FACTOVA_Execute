@@ -45,17 +45,20 @@ namespace FACTOVA_Execute
         {
             _notifyIcon = new NotifyIcon();
             
-            // .ico 파일에서 아이콘 로드
+            // 임베디드 리소스에서 아이콘 로드
             try
             {
-                var iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Icons", "FACTOVA_Execute.ico");
-                if (System.IO.File.Exists(iconPath))
+                // WPF 리소스에서 아이콘 로드
+                var iconUri = new Uri("pack://application:,,,/Icons/FACTOVA_Execute.ico");
+                var streamInfo = System.Windows.Application.GetResourceStream(iconUri);
+                
+                if (streamInfo != null)
                 {
-                    _notifyIcon.Icon = new Icon(iconPath);
+                    _notifyIcon.Icon = new Icon(streamInfo.Stream);
                 }
                 else
                 {
-                    // ico 파일이 없으면 기본 아이콘 사용
+                    // 리소스 로드 실패 시 기본 아이콘 사용
                     _notifyIcon.Icon = SystemIcons.Application;
                 }
             }
