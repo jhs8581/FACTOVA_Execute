@@ -14,8 +14,10 @@ namespace FACTOVA_Execute.Views
     /// </summary>
     public partial class ExecuteTabView : UserControl
     {
-        private NetworkMonitorService? _monitorService;
+        private NetworkMonitorService? _networkMonitorService;
+        private ProcessMonitorService? _processMonitorService;
         private readonly GeneralSettingsRepository _generalRepository;
+        private readonly TriggerSettingsRepository _triggerRepository;
         private readonly ProgramRepository _programRepository;
         private bool _isInitialized = false; // 초기화 여부 플래그
 
@@ -23,6 +25,7 @@ namespace FACTOVA_Execute.Views
         {
             InitializeComponent();
             _generalRepository = new GeneralSettingsRepository();
+            _triggerRepository = new TriggerSettingsRepository();
             _programRepository = new ProgramRepository();
             InitializeLog();
             Unloaded += ExecuteTabView_Unloaded;
@@ -130,18 +133,55 @@ namespace FACTOVA_Execute.Views
                 var totalMargin = 20 + (itemsPerRow - 1) * 10;
                 var buttonWidth = (availableWidth - totalMargin - 20) / itemsPerRow; // 스크롤바 여유 20px
                 
-                if (buttonWidth < 80) 
+                if (buttonWidth < 100) 
                 {
-                    buttonWidth = 80; // 최소 너비
+                    buttonWidth = 100; // 최소 너비
                 }
 
                 // 버튼 생성 및 추가
                 for (int i = 0; i < programs.Count; i++)
                 {
                     var program = programs[i];
+                    
+                    // 버튼 내용: 아이콘 + 텍스트 (가로 배치)
+                    var stackPanel = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+
+                    // 아이콘 추출 및 추가
+                    var iconSource = Helpers.IconExtractor.ExtractIconFromFile(program.ProgramPath);
+                    if (iconSource != null)
+                    {
+                        var iconImage = new System.Windows.Controls.Image
+                        {
+                            Source = iconSource,
+                            Width = 32,
+                            Height = 32,
+                            Margin = new Thickness(0, 0, 10, 0)
+                        };
+                        stackPanel.Children.Add(iconImage);
+                    }
+
+                    // 프로그램명 텍스트
+                    var textBlock = new TextBlock
+                    {
+                        Text = program.ProgramName,
+                        TextAlignment = TextAlignment.Left,
+                        TextWrapping = TextWrapping.Wrap,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontSize = 13,
+                        FontWeight = FontWeights.SemiBold,
+                        MaxWidth = buttonWidth - 60 // 아이콘과 여백 제외
+                    };
+                    stackPanel.Children.Add(textBlock);
+
+                    // 버튼 생성
                     var button = new Button
                     {
-                        Content = program.ProgramName,
+                        Content = stackPanel,
                         Style = (Style)FindResource("LauncherButtonStyle"),
                         Width = buttonWidth,
                         Tag = program
@@ -242,11 +282,17 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
-                _monitorService?.Dispose();
-                _monitorService = new NetworkMonitorService();
-                _monitorService.LogMessageReceived += OnLogMessageReceived;
-                _monitorService.AllProgramsStarted += OnAllProgramsStarted;
-                _monitorService.StartMonitoring();
+                // 기존 서비스 정리
+                _networkMonitorService?.Dispose();
+                _processMonitorService?.Dispose();
+                _networkMonitorService = null;
+                _processMonitorService = null;
+
+                // 항상 네트워크 모니터링부터 시작
+                _networkMonitorService = new NetworkMonitorService();
+                _networkMonitorService.LogMessageReceived += OnLogMessageReceived;
+                _networkMonitorService.AllProgramsStarted += OnNetworkProgramsCompleted; // Network 완료 후 Trigger 시작
+                _networkMonitorService.StartMonitoring();
 
                 StartMonitorButton.IsEnabled = false;
                 StopMonitorButton.IsEnabled = true;
@@ -272,9 +318,13 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
-                _monitorService?.StopMonitoring();
-                _monitorService?.Dispose();
-                _monitorService = null;
+                _networkMonitorService?.StopMonitoring();
+                _networkMonitorService?.Dispose();
+                _networkMonitorService = null;
+
+                _processMonitorService?.StopMonitoring();
+                _processMonitorService?.Dispose();
+                _processMonitorService = null;
 
                 StartMonitorButton.IsEnabled = true;
                 StopMonitorButton.IsEnabled = false;
@@ -314,11 +364,28 @@ namespace FACTOVA_Execute.Views
         }
 
         /// <summary>
-        /// 로그 메시지 수신 이벤트 핸들러
+        /// 로그 메시지 수신 이벤트 핸들러 (NetworkMonitorService용)
         /// </summary>
         private void OnLogMessageReceived(string message, NetworkMonitorService.LogLevel level)
         {
             Dispatcher.Invoke(() => AddLogMessage(message, level));
+        }
+
+        /// <summary>
+        /// 로그 메시지 수신 이벤트 핸들러 (ProcessMonitorService용)
+        /// </summary>
+        private void OnProcessLogMessageReceived(string message, ProcessMonitorService.LogLevel level)
+        {
+            // ProcessMonitorService.LogLevel을 NetworkMonitorService.LogLevel로 변환
+            var networkLevel = level switch
+            {
+                ProcessMonitorService.LogLevel.Info => NetworkMonitorService.LogLevel.Info,
+                ProcessMonitorService.LogLevel.Warning => NetworkMonitorService.LogLevel.Warning,
+                ProcessMonitorService.LogLevel.Error => NetworkMonitorService.LogLevel.Error,
+                ProcessMonitorService.LogLevel.Success => NetworkMonitorService.LogLevel.Success,
+                _ => NetworkMonitorService.LogLevel.Info
+            };
+            Dispatcher.Invoke(() => AddLogMessage(message, networkLevel));
         }
 
         /// <summary>
@@ -334,12 +401,48 @@ namespace FACTOVA_Execute.Views
                 AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
                 
                 // 모니터링 중지
-                _monitorService?.StopMonitoring();
-                _monitorService?.Dispose();
-                _monitorService = null;
+                _networkMonitorService?.StopMonitoring();
+                _networkMonitorService?.Dispose();
+                _networkMonitorService = null;
+
+                _processMonitorService?.StopMonitoring();
+                _processMonitorService?.Dispose();
+                _processMonitorService = null;
 
                 StartMonitorButton.IsEnabled = true;
                 StopMonitorButton.IsEnabled = false;
+            });
+        }
+
+        /// <summary>
+        /// Network 모드 프로그램 시작 완료 이벤트 핸들러
+        /// </summary>
+        private void OnNetworkProgramsCompleted()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
+                AddLogMessage("네트워크 연결 실행 완료!", NetworkMonitorService.LogLevel.Success);
+                AddLogMessage("프로그램 감지 모니터링을 시작합니다...", NetworkMonitorService.LogLevel.Info);
+                AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
+                
+                // 네트워크 모니터링 중지
+                _networkMonitorService?.StopMonitoring();
+                _networkMonitorService?.Dispose();
+                _networkMonitorService = null;
+
+                // 프로세스 모니터링 시작
+                try
+                {
+                    _processMonitorService = new ProcessMonitorService();
+                    _processMonitorService.LogMessageReceived += OnProcessLogMessageReceived;
+                    _processMonitorService.AllProgramsStarted += OnAllProgramsStarted;
+                    _processMonitorService.StartMonitoring();
+                }
+                catch (Exception ex)
+                {
+                    AddLogMessage($"프로그램 감지 모니터링 시작 실패: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                }
             });
         }
 
@@ -363,7 +466,8 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private void ExecuteTabView_Unloaded(object sender, RoutedEventArgs e)
         {
-            _monitorService?.Dispose();
+            _networkMonitorService?.Dispose();
+            _processMonitorService?.Dispose();
         }
     }
 }

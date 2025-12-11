@@ -27,7 +27,9 @@ namespace FACTOVA_Execute.Data
                     IsEnabled INTEGER NOT NULL DEFAULT 1,
                     ProgramName TEXT NOT NULL,
                     ProgramPath TEXT NOT NULL,
-                    ProcessName TEXT NOT NULL DEFAULT ''
+                    ProcessName TEXT NOT NULL DEFAULT '',
+                    ExecutionMode TEXT NOT NULL DEFAULT 'Network',
+                    ExecutionOrder INTEGER NOT NULL DEFAULT 1
                 );
             ";
             command.ExecuteNonQuery();
@@ -60,10 +62,22 @@ namespace FACTOVA_Execute.Data
             ";
             command.ExecuteNonQuery();
 
+            // TriggerSettings 테이블 생성
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS TriggerSettings (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    TargetProcesses TEXT NOT NULL DEFAULT '',
+                    CheckIntervalSeconds INTEGER NOT NULL DEFAULT 5,
+                    AutoStartPrograms INTEGER NOT NULL DEFAULT 1
+                );
+            ";
+            command.ExecuteNonQuery();
+
             // 기존 테이블 마이그레이션
             MigrateProgramsTable(connection);
             MigrateNetworkSettings(connection);
             MigrateGeneralSettings(connection);
+            MigrateTriggerSettings(connection);
 
             // 기본 프로그램 데이터 삽입 (없을 경우에만)
             InitializeDefaultPrograms(connection);
@@ -73,6 +87,9 @@ namespace FACTOVA_Execute.Data
             
             // 기본 일반 설정 삽입 (없을 경우에만)
             InitializeDefaultGeneralSettings(connection);
+            
+            // 기본 트리거 설정 삽입 (없을 경우에만)
+            InitializeDefaultTriggerSettings(connection);
         }
 
         /// <summary>
@@ -99,6 +116,34 @@ namespace FACTOVA_Execute.Data
                 {
                     command.CommandText = "ALTER TABLE Programs ADD COLUMN ProcessName TEXT NOT NULL DEFAULT ''";
                     command.ExecuteNonQuery();
+                }
+
+                // ExecutionMode 컬럼이 없으면 추가
+                if (!columns.Contains("ExecutionMode"))
+                {
+                    command.CommandText = "ALTER TABLE Programs ADD COLUMN ExecutionMode TEXT NOT NULL DEFAULT 'Network'";
+                    command.ExecuteNonQuery();
+                    
+                    // GroupId가 있으면 마이그레이션 (GroupId 1,2 → Network, 3,4 → Trigger)
+                    if (columns.Contains("GroupId"))
+                    {
+                        command.CommandText = "UPDATE Programs SET ExecutionMode = CASE WHEN GroupId <= 2 THEN 'Network' ELSE 'Trigger' END";
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                // ExecutionOrder 컬럼이 없으면 추가
+                if (!columns.Contains("ExecutionOrder"))
+                {
+                    command.CommandText = "ALTER TABLE Programs ADD COLUMN ExecutionOrder INTEGER NOT NULL DEFAULT 1";
+                    command.ExecuteNonQuery();
+                    
+                    // GroupOrder가 있으면 마이그레이션
+                    if (columns.Contains("GroupOrder"))
+                    {
+                        command.CommandText = "UPDATE Programs SET ExecutionOrder = GroupOrder";
+                        command.ExecuteNonQuery();
+                    }
                 }
             }
             catch (Exception ex)
@@ -206,6 +251,47 @@ namespace FACTOVA_Execute.Data
         }
 
         /// <summary>
+        /// TriggerSettings 테이블 마이그레이션
+        /// </summary>
+        private static void MigrateTriggerSettings(SqliteConnection connection)
+        {
+            try
+            {
+                // 기존 컬럼 확인
+                var command = connection.CreateCommand();
+                command.CommandText = "PRAGMA table_info(TriggerSettings)";
+                var reader = command.ExecuteReader();
+                
+                var columns = new List<string>();
+                while (reader.Read())
+                {
+                    columns.Add(reader.GetString(1)); // 컬럼명
+                }
+                reader.Close();
+
+                // TargetProcesses 컬럼이 없으면 추가
+                if (!columns.Contains("TargetProcesses"))
+                {
+                    command.CommandText = "ALTER TABLE TriggerSettings ADD COLUMN TargetProcesses TEXT NOT NULL DEFAULT ''";
+                    command.ExecuteNonQuery();
+                }
+
+                // AutoStartPrograms 컬럼이 없으면 추가
+                if (!columns.Contains("AutoStartPrograms"))
+                {
+                    command.CommandText = "ALTER TABLE TriggerSettings ADD COLUMN AutoStartPrograms INTEGER NOT NULL DEFAULT 1";
+                    command.ExecuteNonQuery();
+                }
+                
+                // TriggerType 컬럼이 있으면 무시 (하위 호환성 - 읽지 않음)
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TriggerSettings 테이블 마이그레이션 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 기본 프로그램 4개를 초기화
         /// </summary>
         private static void InitializeDefaultPrograms(SqliteConnection connection)
@@ -216,25 +302,29 @@ namespace FACTOVA_Execute.Data
 
             if (count == 0)
             {
-                // 개별 INSERT로 변경하여 안정성 향상
-                InsertProgram(connection, "SFC Update", @"C:\Program Files (x86)\GMES Shop Floor Control for LGE\FACTOVA.Updater.exe", "FACTOVA.Updater");
-                InsertProgram(connection, "SFC MainFrame", @"C:\Program Files (x86)\GMES Shop Floor Control for LGE\FACTOVA.SFC.MainFrame.exe", "FACTOVA.SFC.MainFrame");
-                InsertProgram(connection, "EIF", @"C:\LGCNS.ezControl\BIN_2.0\LGE.FactoryLync2.0.exe", "LGE.FactoryLync2.0");
-                InsertProgram(connection, "EIF Agent", @"C:\LGE.EA2.0\LGE.GMES2.EA.Executor.exe", "LGE.GMES2.EA.Executor");
+                // SFC 프로그램은 Network 모드로 실행
+                InsertProgram(connection, "SFC Update", @"C:\Program Files (x86)\GMES Shop Floor Control for LGE\FACTOVA.Updater.exe", "FACTOVA.Updater", "Network", 1);
+                InsertProgram(connection, "SFC MainFrame", @"C:\Program Files (x86)\GMES Shop Floor Control for LGE\FACTOVA.SFC.MainFrame.exe", "FACTOVA.SFC.MainFrame", "Network", 2);
+                
+                // EIF 프로그램은 Trigger 모드로 실행
+                InsertProgram(connection, "EIF", @"C:\LGCNS.ezControl\BIN_2.0\LGE.FactoryLync2.0.exe", "LGE.FactoryLync2.0", "Trigger", 1);
+                InsertProgram(connection, "EIF Agent", @"C:\LGE.EA2.0\LGE.GMES2.EA.Executor.exe", "LGE.GMES2.EA.Executor", "Trigger", 2);
             }
         }
 
         /// <summary>
         /// 개별 프로그램 삽입
         /// </summary>
-        private static void InsertProgram(SqliteConnection connection, string programName, string programPath, string processName)
+        private static void InsertProgram(SqliteConnection connection, string programName, string programPath, string processName, string executionMode, int executionOrder)
         {
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO Programs (IsEnabled, ProgramName, ProgramPath, ProcessName) VALUES (@isEnabled, @programName, @programPath, @processName)";
+            command.CommandText = "INSERT INTO Programs (IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder) VALUES (@isEnabled, @programName, @programPath, @processName, @executionMode, @executionOrder)";
             command.Parameters.AddWithValue("@isEnabled", 1);
             command.Parameters.AddWithValue("@programName", programName);
             command.Parameters.AddWithValue("@programPath", programPath);
             command.Parameters.AddWithValue("@processName", processName);
+            command.Parameters.AddWithValue("@executionMode", executionMode);
+            command.Parameters.AddWithValue("@executionOrder", executionOrder);
             command.ExecuteNonQuery();
         }
 
@@ -289,6 +379,28 @@ namespace FACTOVA_Execute.Data
                 command.Parameters.AddWithValue("@autoStartMonitoring", 1);
                 command.Parameters.AddWithValue("@startInTray", 0);
                 command.Parameters.AddWithValue("@launcherItemsPerRow", 5);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// 기본 트리거 설정 초기화
+        /// </summary>
+        private static void InitializeDefaultTriggerSettings(SqliteConnection connection)
+        {
+            var checkCommand = connection.CreateCommand();
+            checkCommand.CommandText = "SELECT COUNT(*) FROM TriggerSettings";
+            var count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+            if (count == 0)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                    INSERT INTO TriggerSettings (TargetProcesses, CheckIntervalSeconds, AutoStartPrograms) 
+                    VALUES (@targetProcesses, @checkIntervalSeconds, @autoStartPrograms)";
+                command.Parameters.AddWithValue("@targetProcesses", "FACTOVA.SFC.MainFrame");
+                command.Parameters.AddWithValue("@checkIntervalSeconds", 5);
+                command.Parameters.AddWithValue("@autoStartPrograms", 1);
                 command.ExecuteNonQuery();
             }
         }

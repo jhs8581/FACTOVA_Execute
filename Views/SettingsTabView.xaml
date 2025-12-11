@@ -16,5 +16,8 @@
         <TabItem Header="네트워크">
             <local:NetworkSettingsView />
         </TabItem>
+        <TabItem Header="프로그램 감지">
+            <local:TriggerSettingsView />
+        </TabItem>
     </TabControl>
 </UserControl>

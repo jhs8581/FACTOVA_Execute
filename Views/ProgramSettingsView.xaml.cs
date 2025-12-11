@@ -83,7 +83,9 @@ namespace FACTOVA_Execute.Views
                     IsEnabled = true,
                     ProgramName = fileName,
                     ProgramPath = openFileDialog.FileName,
-                    ProcessName = fileName // 프로세스명 자동 설정
+                    ProcessName = fileName, // 프로세스명 자동 설정
+                    ExecutionMode = "Network", // 기본값: Network
+                    ExecutionOrder = 1 // 기본 순서: 1
                 };
 
                 _repository.AddProgram(newProgram);

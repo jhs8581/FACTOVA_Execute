@@ -200,25 +200,28 @@ namespace FACTOVA_Execute.Services
             try
             {
                 var programs = _programRepository.GetAllPrograms()
-                    .Where(p => p.IsEnabled)
+                    .Where(p => p.IsEnabled && p.ExecutionMode == "Network")
+                    .OrderBy(p => p.ExecutionOrder)
                     .ToList();
 
                 if (!programs.Any())
                 {
-                    LogMessage("실행할 프로그램이 없습니다.", LogLevel.Warning);
+                    LogMessage("실행할 네트워크 연결 실행 모드 프로그램이 없습니다.", LogLevel.Warning);
                     return;
                 }
 
-                LogMessage($"프로그램 실행 시작 ({programs.Count}개)...", LogLevel.Info);
+                LogMessage($"네트워크 연결 실행 시작 ({programs.Count}개)...", LogLevel.Info);
 
                 foreach (var program in programs)
                 {
                     await StartProgram(program);
-                    await Task.Delay(1000); // 프로그램 간 1초 대기
+                    
+                    // 프로그램 간 1초 대기 (순차 실행)
+                    await Task.Delay(1000);
                 }
 
                 _isProgramsStarted = true;
-                LogMessage("모든 프로그램 실행 완료", LogLevel.Success);
+                LogMessage("모든 네트워크 연결 실행 모드 프로그램 실행 완료", LogLevel.Success);
             }
             catch (Exception ex)
             {

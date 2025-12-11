@@ -12,6 +12,8 @@ namespace FACTOVA_Execute.Models
         private string _programName = string.Empty;
         private string _programPath = string.Empty;
         private string _processName = string.Empty; // 모니터링할 프로세스명
+        private string _executionMode = "Network"; // 실행 모드: Network 또는 Trigger
+        private int _executionOrder = 1; // 실행 순서
 
         public int Id
         {
@@ -64,6 +66,32 @@ namespace FACTOVA_Execute.Models
             {
                 _processName = value;
                 OnPropertyChanged(nameof(ProcessName));
+            }
+        }
+
+        /// <summary>
+        /// 실행 모드: "Network" (네트워크 연결 시) 또는 "Trigger" (프로세스 감지 시)
+        /// </summary>
+        public string ExecutionMode
+        {
+            get => _executionMode;
+            set
+            {
+                _executionMode = value;
+                OnPropertyChanged(nameof(ExecutionMode));
+            }
+        }
+
+        /// <summary>
+        /// 실행 순서 (숫자가 작을수록 먼저 실행)
+        /// </summary>
+        public int ExecutionOrder
+        {
+            get => _executionOrder;
+            set
+            {
+                _executionOrder = value;
+                OnPropertyChanged(nameof(ExecutionOrder));
             }
         }
 
