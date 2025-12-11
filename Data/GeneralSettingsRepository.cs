@@ -17,7 +17,7 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray FROM GeneralSettings LIMIT 1";
+            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow FROM GeneralSettings LIMIT 1";
 
             using var reader = command.ExecuteReader();
             if (reader.Read())
@@ -26,7 +26,8 @@ namespace FACTOVA_Execute.Data
                 {
                     Id = reader.GetInt32(0),
                     AutoStartMonitoring = reader.GetInt32(1) == 1,
-                    StartInTray = reader.GetInt32(2) == 1
+                    StartInTray = reader.GetInt32(2) == 1,
+                    LauncherItemsPerRow = reader.GetInt32(3)
                 };
             }
 
@@ -34,7 +35,8 @@ namespace FACTOVA_Execute.Data
             return new GeneralSettings
             {
                 AutoStartMonitoring = true,
-                StartInTray = false
+                StartInTray = false,
+                LauncherItemsPerRow = 5
             };
         }
 
@@ -50,11 +52,13 @@ namespace FACTOVA_Execute.Data
             command.CommandText = @"
                 UPDATE GeneralSettings 
                 SET AutoStartMonitoring = @autoStartMonitoring,
-                    StartInTray = @startInTray
+                    StartInTray = @startInTray,
+                    LauncherItemsPerRow = @launcherItemsPerRow
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", settings.Id);
             command.Parameters.AddWithValue("@autoStartMonitoring", settings.AutoStartMonitoring ? 1 : 0);
             command.Parameters.AddWithValue("@startInTray", settings.StartInTray ? 1 : 0);
+            command.Parameters.AddWithValue("@launcherItemsPerRow", settings.LauncherItemsPerRow);
 
             command.ExecuteNonQuery();
         }

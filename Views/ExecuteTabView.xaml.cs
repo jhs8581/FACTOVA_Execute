@@ -5,6 +5,7 @@ using FACTOVA_Execute.Services;
 using FACTOVA_Execute.Helpers;
 using FACTOVA_Execute.Data;
 using ICSharpCode.AvalonEdit.Document;
+using System.Diagnostics;
 
 namespace FACTOVA_Execute.Views
 {
@@ -15,17 +16,28 @@ namespace FACTOVA_Execute.Views
     {
         private NetworkMonitorService? _monitorService;
         private readonly GeneralSettingsRepository _generalRepository;
+        private readonly ProgramRepository _programRepository;
         private bool _isInitialized = false; // 초기화 여부 플래그
 
         public ExecuteTabView()
         {
             InitializeComponent();
             _generalRepository = new GeneralSettingsRepository();
+            _programRepository = new ProgramRepository();
             InitializeLog();
             Unloaded += ExecuteTabView_Unloaded;
             
             // 프로그램 로드 후 자동 실행 옵션 확인 (한 번만)
             Loaded += ExecuteTabView_Loaded;
+            
+            // LauncherPanel이 크기 변경될 때마다 런처 다시 로드
+            LauncherPanel.SizeChanged += (s, e) =>
+            {
+                if (e.WidthChanged && LauncherPanel.ActualWidth > 0)
+                {
+                    LoadLauncher();
+                }
+            };
         }
 
         /// <summary>
@@ -33,6 +45,9 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private void ExecuteTabView_Loaded(object sender, RoutedEventArgs e)
         {
+            // 런처 로드 (크기가 확정된 후)
+            LoadLauncher();
+            
             // 이미 초기화되었으면 실행하지 않음
             if (_isInitialized)
                 return;
@@ -60,6 +75,148 @@ namespace FACTOVA_Execute.Views
             catch (Exception ex)
             {
                 AddLogMessage($"초기화 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// 런처 새로고침 (외부에서 호출 가능)
+        /// </summary>
+        public void RefreshLauncher()
+        {
+            Dispatcher.Invoke(() => LoadLauncher());
+        }
+
+        /// <summary>
+        /// 런처 로드
+        /// </summary>
+        private void LoadLauncher()
+        {
+            try
+            {
+                LauncherPanel.Children.Clear();
+                
+                var settings = _generalRepository.GetSettings();
+                var itemsPerRow = settings.LauncherItemsPerRow;
+                
+                var programs = _programRepository.GetAllPrograms()
+                    .Where(p => p.IsEnabled)
+                    .ToList();
+
+                if (programs.Count == 0)
+                {
+                    var noItemsText = new TextBlock
+                    {
+                        Text = "등록된 프로그램이 없습니다.\n'설정 > 프로그램 설정'에서 프로그램을 추가하고 '사용'을 체크하세요.",
+                        FontSize = 14,
+                        Foreground = new SolidColorBrush(Color.FromRgb(108, 117, 125)),
+                        TextAlignment = TextAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(20)
+                    };
+                    LauncherPanel.Children.Add(noItemsText);
+                    return;
+                }
+
+                // 실제 사용 가능한 너비 계산
+                var scrollViewer = FindParent<ScrollViewer>(LauncherPanel);
+                var availableWidth = scrollViewer?.ActualWidth ?? LauncherPanel.ActualWidth;
+                
+                if (availableWidth <= 0)
+                {
+                    availableWidth = 800; // 기본값
+                }
+
+                // 여백 계산 (양쪽 10px + 버튼 간격)
+                var totalMargin = 20 + (itemsPerRow - 1) * 10;
+                var buttonWidth = (availableWidth - totalMargin - 20) / itemsPerRow; // 스크롤바 여유 20px
+                
+                if (buttonWidth < 80) 
+                {
+                    buttonWidth = 80; // 최소 너비
+                }
+
+                // 버튼 생성 및 추가
+                for (int i = 0; i < programs.Count; i++)
+                {
+                    var program = programs[i];
+                    var button = new Button
+                    {
+                        Content = program.ProgramName,
+                        Style = (Style)FindResource("LauncherButtonStyle"),
+                        Width = buttonWidth,
+                        Tag = program
+                    };
+                    button.Click += LauncherButton_Click;
+                    LauncherPanel.Children.Add(button);
+
+                    // 행별로 줄바꿈 강제 (itemsPerRow 개수마다)
+                    if ((i + 1) % itemsPerRow == 0 && i < programs.Count - 1)
+                    {
+                        // 줄바꿈을 위한 더미 요소 추가
+                        LauncherPanel.Children.Add(new Border { Width = availableWidth, Height = 0 });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"런처 로드 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// 부모 컨트롤 찾기
+        /// </summary>
+        private T? FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            var parent = VisualTreeHelper.GetParent(child);
+            if (parent == null) return null;
+            if (parent is T typedParent) return typedParent;
+            return FindParent<T>(parent);
+        }
+
+        /// <summary>
+        /// 런처 버튼 클릭 이벤트
+        /// </summary>
+        private async void LauncherButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Models.ProgramInfo program)
+            {
+                try
+                {
+                    AddLogMessage($"프로그램 실행: {program.ProgramName}", NetworkMonitorService.LogLevel.Info);
+
+                    // 프로세스 중복 확인
+                    if (!string.IsNullOrWhiteSpace(program.ProcessName))
+                    {
+                        var existingProcess = Process.GetProcessesByName(program.ProcessName);
+                        if (existingProcess.Length > 0)
+                        {
+                            AddLogMessage($"이미 실행 중입니다: {program.ProgramName} (프로세스: {program.ProcessName})", NetworkMonitorService.LogLevel.Warning);
+                            return;
+                        }
+                    }
+
+                    // 프로그램 실행
+                    if (System.IO.File.Exists(program.ProgramPath))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = program.ProgramPath,
+                            UseShellExecute = true
+                        });
+                        
+                        await Task.Delay(1000); // 1초 대기
+                        AddLogMessage($"실행 완료: {program.ProgramName}", NetworkMonitorService.LogLevel.Success);
+                    }
+                    else
+                    {
+                        AddLogMessage($"프로그램 파일을 찾을 수 없습니다: {program.ProgramPath}", NetworkMonitorService.LogLevel.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AddLogMessage($"실행 오류 ({program.ProgramName}): {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                }
             }
         }
 

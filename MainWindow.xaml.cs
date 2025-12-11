@@ -22,10 +22,12 @@ namespace FACTOVA_Execute
     {
         private NotifyIcon? _notifyIcon;
         private readonly GeneralSettingsRepository _generalRepository;
+        public static MainWindow? Instance { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
+            Instance = this;
             _generalRepository = new GeneralSettingsRepository();
             
             // 트레이 아이콘 초기화
@@ -36,6 +38,34 @@ namespace FACTOVA_Execute
             
             // 창 닫기 이벤트
             Closing += MainWindow_Closing;
+        }
+
+        /// <summary>
+        /// ExecuteTabView 런처 새로고침
+        /// </summary>
+        public void RefreshExecuteTabLauncher()
+        {
+            // ExecuteTab의 ExecuteTabView 찾기
+            var executeTabView = FindVisualChild<Views.ExecuteTabView>(this);
+            executeTabView?.RefreshLauncher();
+        }
+
+        /// <summary>
+        /// 자식 컨트롤 찾기 (재귀)
+        /// </summary>
+        private T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                    return typedChild;
+
+                var result = FindVisualChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
         }
 
         /// <summary>

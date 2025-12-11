@@ -89,6 +89,9 @@ namespace FACTOVA_Execute.Views
                 _repository.AddProgram(newProgram);
                 LoadPrograms();
                 
+                // 런처 새로고침
+                MainWindow.Instance?.RefreshExecuteTabLauncher();
+                
                 MessageBox.Show("프로그램이 추가되었습니다.", "추가 완료", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
@@ -111,6 +114,9 @@ namespace FACTOVA_Execute.Views
                     _repository.DeleteProgram(selectedProgram.Id);
                     LoadPrograms();
                     
+                    // 런처 새로고침
+                    MainWindow.Instance?.RefreshExecuteTabLauncher();
+                    
                     MessageBox.Show("프로그램이 삭제되었습니다.", "삭제 완료", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -131,6 +137,9 @@ namespace FACTOVA_Execute.Views
                 {
                     _repository.UpdateProgram(program);
                 }
+
+                // 런처 새로고침
+                MainWindow.Instance?.RefreshExecuteTabLauncher();
 
                 MessageBox.Show("설정이 저장되었습니다.", "저장 완료", MessageBoxButton.OK, MessageBoxImage.Information);
             }

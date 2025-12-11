@@ -54,7 +54,8 @@ namespace FACTOVA_Execute.Data
                 CREATE TABLE IF NOT EXISTS GeneralSettings (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     AutoStartMonitoring INTEGER NOT NULL DEFAULT 1,
-                    StartInTray INTEGER NOT NULL DEFAULT 0
+                    StartInTray INTEGER NOT NULL DEFAULT 0,
+                    LauncherItemsPerRow INTEGER NOT NULL DEFAULT 5
                 );
             ";
             command.ExecuteNonQuery();
@@ -62,6 +63,7 @@ namespace FACTOVA_Execute.Data
             // 기존 테이블 마이그레이션
             MigrateProgramsTable(connection);
             MigrateNetworkSettings(connection);
+            MigrateGeneralSettings(connection);
 
             // 기본 프로그램 데이터 삽입 (없을 경우에만)
             InitializeDefaultPrograms(connection);
@@ -172,6 +174,38 @@ namespace FACTOVA_Execute.Data
         }
 
         /// <summary>
+        /// 일반 설정 테이블 마이그레이션
+        /// </summary>
+        private static void MigrateGeneralSettings(SqliteConnection connection)
+        {
+            try
+            {
+                // 기존 컬럼 확인
+                var command = connection.CreateCommand();
+                command.CommandText = "PRAGMA table_info(GeneralSettings)";
+                var reader = command.ExecuteReader();
+                
+                var columns = new List<string>();
+                while (reader.Read())
+                {
+                    columns.Add(reader.GetString(1)); // 컬럼명
+                }
+                reader.Close();
+
+                // LauncherItemsPerRow 컬럼이 없으면 추가
+                if (!columns.Contains("LauncherItemsPerRow"))
+                {
+                    command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN LauncherItemsPerRow INTEGER NOT NULL DEFAULT 5";
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GeneralSettings 테이블 마이그레이션 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 기본 프로그램 4개를 초기화
         /// </summary>
         private static void InitializeDefaultPrograms(SqliteConnection connection)
@@ -250,10 +284,11 @@ namespace FACTOVA_Execute.Data
             {
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                    INSERT INTO GeneralSettings (AutoStartMonitoring, StartInTray) 
-                    VALUES (@autoStartMonitoring, @startInTray)";
+                    INSERT INTO GeneralSettings (AutoStartMonitoring, StartInTray, LauncherItemsPerRow) 
+                    VALUES (@autoStartMonitoring, @startInTray, @launcherItemsPerRow)";
                 command.Parameters.AddWithValue("@autoStartMonitoring", 1);
                 command.Parameters.AddWithValue("@startInTray", 0);
+                command.Parameters.AddWithValue("@launcherItemsPerRow", 5);
                 command.ExecuteNonQuery();
             }
         }

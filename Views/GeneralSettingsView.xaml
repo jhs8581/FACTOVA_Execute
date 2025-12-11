@@ -86,7 +86,10 @@
                 </Border>
 
                 <!-- 트레이로 실행 -->
-                <Border Padding="0,0,0,20">
+                <Border BorderBrush="#DEE2E6" 
+                        BorderThickness="0,0,0,1"
+                        Padding="0,0,0,20"
+                        Margin="0,0,0,20">
                     <StackPanel>
                         <TextBlock Text="프로그램 실행 모드" 
                                    FontSize="16" 
@@ -124,6 +127,36 @@
                                            Text="'트레이로 실행' 옵션은 프로그램을 다시 시작한 후에 적용됩니다."/>
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- 런처 설정 -->
+                <Border Padding="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="런처 설정" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Foreground="#212529"
+                                   Margin="0,0,0,10"/>
+                        
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <TextBlock Text="행별 개수:" 
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,10,0"/>
+                            <TextBox x:Name="LauncherItemsPerRowTextBox"
+                                     Width="60"
+                                     Height="30"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     Padding="5,0"/>
+                        </StackPanel>
+                        
+                        <TextBlock TextWrapping="Wrap" 
+                                   FontSize="12" 
+                                   Foreground="#6C757D"
+                                   Text="프로그램 실행 모니터의 런처 탭에서 한 줄에 표시할 프로그램 버튼의 개수를 설정합니다. (권장: 3~8)"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
