@@ -29,7 +29,8 @@ namespace FACTOVA_Execute.Data
                     ProgramPath TEXT NOT NULL,
                     ProcessName TEXT NOT NULL DEFAULT '',
                     ExecutionMode TEXT NOT NULL DEFAULT 'Network',
-                    ExecutionOrder INTEGER NOT NULL DEFAULT 1
+                    ExecutionOrder INTEGER NOT NULL DEFAULT 1,
+                    IsFolder INTEGER NOT NULL DEFAULT 0
                 );
             ";
             command.ExecuteNonQuery();
@@ -57,7 +58,8 @@ namespace FACTOVA_Execute.Data
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     AutoStartMonitoring INTEGER NOT NULL DEFAULT 1,
                     StartInTray INTEGER NOT NULL DEFAULT 0,
-                    LauncherItemsPerRow INTEGER NOT NULL DEFAULT 5
+                    LauncherItemsPerRow INTEGER NOT NULL DEFAULT 5,
+                    LauncherViewMode TEXT NOT NULL DEFAULT 'Grid'
                 );
             ";
             command.ExecuteNonQuery();
@@ -144,6 +146,13 @@ namespace FACTOVA_Execute.Data
                         command.CommandText = "UPDATE Programs SET ExecutionOrder = GroupOrder";
                         command.ExecuteNonQuery();
                     }
+                }
+
+                // IsFolder 컬럼이 없으면 추가
+                if (!columns.Contains("IsFolder"))
+                {
+                    command.CommandText = "ALTER TABLE Programs ADD COLUMN IsFolder INTEGER NOT NULL DEFAULT 0";
+                    command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -241,6 +250,13 @@ namespace FACTOVA_Execute.Data
                 if (!columns.Contains("LauncherItemsPerRow"))
                 {
                     command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN LauncherItemsPerRow INTEGER NOT NULL DEFAULT 5";
+                    command.ExecuteNonQuery();
+                }
+                
+                // LauncherViewMode 컬럼이 없으면 추가
+                if (!columns.Contains("LauncherViewMode"))
+                {
+                    command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN LauncherViewMode TEXT NOT NULL DEFAULT 'Grid'";
                     command.ExecuteNonQuery();
                 }
             }
@@ -374,11 +390,12 @@ namespace FACTOVA_Execute.Data
             {
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                    INSERT INTO GeneralSettings (AutoStartMonitoring, StartInTray, LauncherItemsPerRow) 
-                    VALUES (@autoStartMonitoring, @startInTray, @launcherItemsPerRow)";
+                    INSERT INTO GeneralSettings (AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode) 
+                    VALUES (@autoStartMonitoring, @startInTray, @launcherItemsPerRow, @launcherViewMode)";
                 command.Parameters.AddWithValue("@autoStartMonitoring", 1);
                 command.Parameters.AddWithValue("@startInTray", 0);
                 command.Parameters.AddWithValue("@launcherItemsPerRow", 5);
+                command.Parameters.AddWithValue("@launcherViewMode", "Grid");
                 command.ExecuteNonQuery();
             }
         }

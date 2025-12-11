@@ -20,7 +20,7 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder FROM Programs ORDER BY ExecutionMode, ExecutionOrder";
+            command.CommandText = "SELECT Id, IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder, IsFolder FROM Programs ORDER BY ExecutionMode, ExecutionOrder";
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
@@ -33,7 +33,8 @@ namespace FACTOVA_Execute.Data
                     ProgramPath = reader.GetString(3),
                     ProcessName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
                     ExecutionMode = reader.IsDBNull(5) ? "Network" : reader.GetString(5),
-                    ExecutionOrder = reader.IsDBNull(6) ? 1 : reader.GetInt32(6)
+                    ExecutionOrder = reader.IsDBNull(6) ? 1 : reader.GetInt32(6),
+                    IsFolder = reader.IsDBNull(7) ? false : reader.GetInt32(7) == 1
                 });
             }
 
@@ -50,14 +51,15 @@ namespace FACTOVA_Execute.Data
 
             var command = connection.CreateCommand();
             command.CommandText = @"
-                INSERT INTO Programs (IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder) 
-                VALUES (@isEnabled, @programName, @programPath, @processName, @executionMode, @executionOrder)";
+                INSERT INTO Programs (IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder, IsFolder) 
+                VALUES (@isEnabled, @programName, @programPath, @processName, @executionMode, @executionOrder, @isFolder)";
             command.Parameters.AddWithValue("@isEnabled", program.IsEnabled ? 1 : 0);
             command.Parameters.AddWithValue("@programName", program.ProgramName);
             command.Parameters.AddWithValue("@programPath", program.ProgramPath);
             command.Parameters.AddWithValue("@processName", program.ProcessName ?? string.Empty);
             command.Parameters.AddWithValue("@executionMode", program.ExecutionMode);
             command.Parameters.AddWithValue("@executionOrder", program.ExecutionOrder);
+            command.Parameters.AddWithValue("@isFolder", program.IsFolder ? 1 : 0);
 
             command.ExecuteNonQuery();
         }
@@ -78,7 +80,8 @@ namespace FACTOVA_Execute.Data
                     ProgramPath = @programPath,
                     ProcessName = @processName,
                     ExecutionMode = @executionMode,
-                    ExecutionOrder = @executionOrder
+                    ExecutionOrder = @executionOrder,
+                    IsFolder = @isFolder
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", program.Id);
             command.Parameters.AddWithValue("@isEnabled", program.IsEnabled ? 1 : 0);
@@ -87,6 +90,7 @@ namespace FACTOVA_Execute.Data
             command.Parameters.AddWithValue("@processName", program.ProcessName ?? string.Empty);
             command.Parameters.AddWithValue("@executionMode", program.ExecutionMode);
             command.Parameters.AddWithValue("@executionOrder", program.ExecutionOrder);
+            command.Parameters.AddWithValue("@isFolder", program.IsFolder ? 1 : 0);
 
             command.ExecuteNonQuery();
         }

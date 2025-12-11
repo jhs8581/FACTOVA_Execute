@@ -14,6 +14,7 @@ namespace FACTOVA_Execute.Models
         private string _processName = string.Empty; // 모니터링할 프로세스명
         private string _executionMode = "Network"; // 실행 모드: Network 또는 Trigger
         private int _executionOrder = 1; // 실행 순서
+        private bool _isFolder = false; // 폴더 여부
 
         public int Id
         {
@@ -92,6 +93,19 @@ namespace FACTOVA_Execute.Models
             {
                 _executionOrder = value;
                 OnPropertyChanged(nameof(ExecutionOrder));
+            }
+        }
+
+        /// <summary>
+        /// 폴더 여부 (true: 폴더, false: 프로그램)
+        /// </summary>
+        public bool IsFolder
+        {
+            get => _isFolder;
+            set
+            {
+                _isFolder = value;
+                OnPropertyChanged(nameof(IsFolder));
             }
         }
 

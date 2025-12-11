@@ -14,6 +14,7 @@ namespace FACTOVA_Execute.Views
     {
         private readonly ProgramRepository _repository;
         private ObservableCollection<ProgramInfo> _programs;
+        private ObservableCollection<ProgramInfo> _allPrograms; // 전체 목록 (필터링용)
 
         public ProgramSettingsView()
         {
@@ -27,8 +28,49 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private void LoadPrograms()
         {
-            _programs = _repository.GetAllPrograms();
+            _allPrograms = _repository.GetAllPrograms();
+            _programs = new ObservableCollection<ProgramInfo>(_allPrograms);
             ProgramsDataGrid.ItemsSource = _programs;
+            
+            // 필터 초기화
+            if (FilterComboBox != null)
+            {
+                FilterComboBox.SelectedIndex = 0; // "전체" 선택
+            }
+        }
+
+        /// <summary>
+        /// 필터 적용
+        /// </summary>
+        private void ApplyFilter()
+        {
+            if (_allPrograms == null || FilterComboBox == null)
+                return;
+
+            var selectedItem = FilterComboBox.SelectedItem as ComboBoxItem;
+            var filterTag = selectedItem?.Tag as string;
+
+            if (filterTag == "All")
+            {
+                // 전체 표시
+                _programs = new ObservableCollection<ProgramInfo>(_allPrograms);
+            }
+            else
+            {
+                // 실행모드별 필터링
+                _programs = new ObservableCollection<ProgramInfo>(
+                    _allPrograms.Where(p => p.ExecutionMode == filterTag));
+            }
+
+            ProgramsDataGrid.ItemsSource = _programs;
+        }
+
+        /// <summary>
+        /// 필터 콤보박스 선택 변경
+        /// </summary>
+        private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilter();
         }
 
         /// <summary>
@@ -89,12 +131,57 @@ namespace FACTOVA_Execute.Views
                 };
 
                 _repository.AddProgram(newProgram);
-                LoadPrograms();
+                LoadPrograms(); // 재조회
                 
                 // 런처 새로고침
                 MainWindow.Instance?.RefreshExecuteTabLauncher();
                 
                 MessageBox.Show("프로그램이 추가되었습니다.", "추가 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// 폴더 추가 버튼 클릭
+        /// </summary>
+        private void AddFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using var dialog = new System.Windows.Forms.FolderBrowserDialog
+                {
+                    Description = "런처에 추가할 폴더를 선택하세요",
+                    ShowNewFolderButton = false,
+                    SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    var selectedPath = dialog.SelectedPath;
+                    var folderName = System.IO.Path.GetFileName(selectedPath);
+
+                    var newFolder = new ProgramInfo
+                    {
+                        IsEnabled = true,
+                        ProgramName = folderName,
+                        ProgramPath = selectedPath,
+                        ProcessName = string.Empty, // 폴더는 프로세스명 없음
+                        ExecutionMode = "Launcher", // 폴더는 항상 런처 전용
+                        ExecutionOrder = 1,
+                        IsFolder = true
+                    };
+
+                    _repository.AddProgram(newFolder);
+                    LoadPrograms(); // 재조회
+
+                    // 런처 새로고침
+                    MainWindow.Instance?.RefreshExecuteTabLauncher();
+
+                    MessageBox.Show($"폴더 '{folderName}'이(가) 런처에 추가되었습니다.", "추가 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"폴더 추가 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -114,7 +201,7 @@ namespace FACTOVA_Execute.Views
                 if (result == MessageBoxResult.Yes)
                 {
                     _repository.DeleteProgram(selectedProgram.Id);
-                    LoadPrograms();
+                    LoadPrograms(); // 재조회
                     
                     // 런처 새로고침
                     MainWindow.Instance?.RefreshExecuteTabLauncher();
@@ -135,10 +222,14 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
-                foreach (var program in _programs)
+                // 현재 표시된 항목뿐만 아니라 전체 목록 저장
+                foreach (var program in _allPrograms)
                 {
                     _repository.UpdateProgram(program);
                 }
+
+                // 저장 후 재조회
+                LoadPrograms();
 
                 // 런처 새로고침
                 MainWindow.Instance?.RefreshExecuteTabLauncher();

@@ -30,7 +30,7 @@ namespace FACTOVA_Execute.Views
             InitializeLog();
             Unloaded += ExecuteTabView_Unloaded;
             
-            // 프로그램 로드 후 자동 실행 옵션 확인 (한 번만)
+            // programas 로드 후 자동 실행 옵션 확인 (한 번만)
             Loaded += ExecuteTabView_Loaded;
             
             // LauncherPanel이 크기 변경될 때마다 런처 다시 로드
@@ -100,6 +100,7 @@ namespace FACTOVA_Execute.Views
                 
                 var settings = _generalRepository.GetSettings();
                 var itemsPerRow = settings.LauncherItemsPerRow;
+                var viewMode = settings.LauncherViewMode;
                 
                 var programs = _programRepository.GetAllPrograms()
                     .Where(p => p.IsEnabled)
@@ -129,78 +130,197 @@ namespace FACTOVA_Execute.Views
                     availableWidth = 800; // 기본값
                 }
 
-                // 여백 계산 (양쪽 10px + 버튼 간격)
+                // 여백 계산
                 var totalMargin = 20 + (itemsPerRow - 1) * 10;
-                var buttonWidth = (availableWidth - totalMargin - 20) / itemsPerRow; // 스크롤바 여유 20px
+                var buttonWidth = (availableWidth - totalMargin - 20) / itemsPerRow;
                 
                 if (buttonWidth < 100) 
                 {
-                    buttonWidth = 100; // 최소 너비
+                    buttonWidth = 100;
                 }
 
-                // 버튼 생성 및 추가
-                for (int i = 0; i < programs.Count; i++)
+                // 보기 모드에 따라 다르게 렌더링
+                if (viewMode == "Group")
                 {
-                    var program = programs[i];
-                    
-                    // 버튼 내용: 아이콘 + 텍스트 (가로 배치)
-                    var stackPanel = new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-
-                    // 아이콘 추출 및 추가
-                    var iconSource = Helpers.IconExtractor.ExtractIconFromFile(program.ProgramPath);
-                    if (iconSource != null)
-                    {
-                        var iconImage = new System.Windows.Controls.Image
-                        {
-                            Source = iconSource,
-                            Width = 32,
-                            Height = 32,
-                            Margin = new Thickness(0, 0, 10, 0)
-                        };
-                        stackPanel.Children.Add(iconImage);
-                    }
-
-                    // 프로그램명 텍스트
-                    var textBlock = new TextBlock
-                    {
-                        Text = program.ProgramName,
-                        TextAlignment = TextAlignment.Left,
-                        TextWrapping = TextWrapping.Wrap,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        FontSize = 13,
-                        FontWeight = FontWeights.SemiBold,
-                        MaxWidth = buttonWidth - 60 // 아이콘과 여백 제외
-                    };
-                    stackPanel.Children.Add(textBlock);
-
-                    // 버튼 생성
-                    var button = new Button
-                    {
-                        Content = stackPanel,
-                        Style = (Style)FindResource("LauncherButtonStyle"),
-                        Width = buttonWidth,
-                        Tag = program
-                    };
-                    button.Click += LauncherButton_Click;
-                    LauncherPanel.Children.Add(button);
-
-                    // 행별로 줄바꿈 강제 (itemsPerRow 개수마다)
-                    if ((i + 1) % itemsPerRow == 0 && i < programs.Count - 1)
-                    {
-                        // 줄바꿈을 위한 더미 요소 추가
-                        LauncherPanel.Children.Add(new Border { Width = availableWidth, Height = 0 });
-                    }
+                    LoadLauncherGroupView(programs, buttonWidth, availableWidth, itemsPerRow);
+                }
+                else
+                {
+                    LoadLauncherGridView(programs, buttonWidth, availableWidth, itemsPerRow);
                 }
             }
             catch (Exception ex)
             {
                 AddLogMessage($"런처 로드 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
             }
+        }
+
+        /// <summary>
+        /// 그리드 보기 (기본)
+        /// </summary>
+        private void LoadLauncherGridView(List<Models.ProgramInfo> programs, double buttonWidth, double availableWidth, int itemsPerRow)
+        {
+            for (int i = 0; i < programs.Count; i++)
+            {
+                var program = programs[i];
+                var button = CreateLauncherButton(program, buttonWidth);
+                LauncherPanel.Children.Add(button);
+
+                // 행별로 줄바꿈
+                if ((i + 1) % itemsPerRow == 0 && i < programs.Count - 1)
+                {
+                    LauncherPanel.Children.Add(new Border { Width = availableWidth, Height = 0 });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 그룹별 보기 (타입별 Expander)
+        /// </summary>
+        private void LoadLauncherGroupView(List<Models.ProgramInfo> programs, double buttonWidth, double availableWidth, int itemsPerRow)
+        {
+            // ExecutionMode별로 그룹화
+            var groups = programs.GroupBy(p => p.ExecutionMode).OrderBy(g => GetGroupOrder(g.Key));
+
+            foreach (var group in groups)
+            {
+                var groupName = GetGroupDisplayName(group.Key);
+                var groupPrograms = group.OrderBy(p => p.ExecutionOrder).ToList();
+
+                // Expander 생성
+                var expander = new Expander
+                {
+                    Header = $"{groupName} ({groupPrograms.Count}개)",
+                    IsExpanded = true,
+                    Margin = new Thickness(0, 0, 0, 15),
+                    FontSize = 14,
+                    FontWeight = FontWeights.Bold,
+                    Width = availableWidth - 20,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch
+                };
+
+                // Expander 내용 (WrapPanel)
+                // WrapPanel의 너비를 정확하게 계산: (buttonWidth + margin) * itemsPerRow
+                var wrapPanelWidth = (buttonWidth + 10) * itemsPerRow;
+                
+                var wrapPanel = new WrapPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                    Width = wrapPanelWidth
+                };
+
+                for (int i = 0; i < groupPrograms.Count; i++)
+                {
+                    var program = groupPrograms[i];
+                    var button = CreateLauncherButton(program, buttonWidth);
+                    wrapPanel.Children.Add(button);
+                }
+
+                expander.Content = wrapPanel;
+                
+                // Expander를 감싸는 Border 추가 (배경 및 테두리)
+                var border = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                    BorderBrush = new SolidColorBrush(Color.FromRgb(222, 226, 230)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(8),
+                    Padding = new Thickness(15),
+                    Margin = new Thickness(0, 0, 0, 10),
+                    Child = expander
+                };
+
+                LauncherPanel.Children.Add(border);
+            }
+        }
+
+        /// <summary>
+        /// 런처 버튼 생성
+        /// </summary>
+        private Button CreateLauncherButton(Models.ProgramInfo program, double buttonWidth)
+        {
+            // 버튼 내용: Grid로 아이콘과 텍스트 영역 분리
+            var grid = new Grid
+            {
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch
+            };
+
+            // 컬럼 정의: 아이콘(고정 50px) + 텍스트(나머지)
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            // 아이콘 추출 및 추가
+            var iconSource = Helpers.IconExtractor.ExtractIconFromFile(program.ProgramPath);
+            if (iconSource != null)
+            {
+                var iconImage = new System.Windows.Controls.Image
+                {
+                    Source = iconSource,
+                    Width = 32,
+                    Height = 32,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                Grid.SetColumn(iconImage, 0);
+                grid.Children.Add(iconImage);
+            }
+
+            // 프로그램명 텍스트
+            var textBlock = new TextBlock
+            {
+                Text = program.ProgramName,
+                TextAlignment = TextAlignment.Left,
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 13,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(5, 0, 0, 0)
+            };
+            Grid.SetColumn(textBlock, 1);
+            grid.Children.Add(textBlock);
+
+            // 버튼 생성
+            var button = new Button
+            {
+                Content = grid,
+                Style = (Style)FindResource("LauncherButtonStyle"),
+                Width = buttonWidth,
+                Tag = program,
+                HorizontalContentAlignment = System.Windows.HorizontalAlignment.Stretch,
+                Padding = new Thickness(5)
+            };
+            button.Click += LauncherButton_Click;
+
+            return button;
+        }
+
+        /// <summary>
+        /// 그룹 표시명 가져오기
+        /// </summary>
+        private string GetGroupDisplayName(string executionMode)
+        {
+            return executionMode switch
+            {
+                "Launcher" => "🚀 런처 전용",
+                "Network" => "🌐 네트워크 연결 실행",
+                "Trigger" => "🔔 프로그램 감지 실행",
+                _ => executionMode
+            };
+        }
+
+        /// <summary>
+        /// 그룹 정렬 순서
+        /// </summary>
+        private int GetGroupOrder(string executionMode)
+        {
+            return executionMode switch
+            {
+                "Launcher" => 1,  // 런처 전용이 맨 위
+                "Network" => 2,
+                "Trigger" => 3,
+                _ => 99
+            };
         }
 
         /// <summary>
@@ -223,6 +343,30 @@ namespace FACTOVA_Execute.Views
             {
                 try
                 {
+                    // 폴더인 경우 탐색기로 열기
+                    if (program.IsFolder)
+                    {
+                        AddLogMessage($"폴더 열기: {program.ProgramName}", NetworkMonitorService.LogLevel.Info);
+                        
+                        if (System.IO.Directory.Exists(program.ProgramPath))
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "explorer.exe",
+                                Arguments = program.ProgramPath,
+                                UseShellExecute = true
+                            });
+                            
+                            AddLogMessage($"폴더 열기 완료: {program.ProgramName}", NetworkMonitorService.LogLevel.Success);
+                        }
+                        else
+                        {
+                            AddLogMessage($"폴더를 찾을 수 없습니다: {program.ProgramPath}", NetworkMonitorService.LogLevel.Error);
+                        }
+                        return;
+                    }
+
+                    // 프로그램인 경우 기존 로직
                     AddLogMessage($"프로그램 실행: {program.ProgramName}", NetworkMonitorService.LogLevel.Info);
 
                     // 프로세스 중복 확인

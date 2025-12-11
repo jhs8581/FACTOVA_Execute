@@ -29,6 +29,16 @@ namespace FACTOVA_Execute.Views
             AutoStartMonitoringCheckBox.IsChecked = _currentSettings.AutoStartMonitoring;
             StartInTrayCheckBox.IsChecked = _currentSettings.StartInTray;
             LauncherItemsPerRowTextBox.Text = _currentSettings.LauncherItemsPerRow.ToString();
+            
+            // 런처 보기 모드
+            if (_currentSettings.LauncherViewMode == "Group")
+            {
+                GroupViewRadio.IsChecked = true;
+            }
+            else
+            {
+                GridViewRadio.IsChecked = true;
+            }
         }
 
         /// <summary>
@@ -40,6 +50,9 @@ namespace FACTOVA_Execute.Views
             {
                 _currentSettings.AutoStartMonitoring = AutoStartMonitoringCheckBox.IsChecked ?? false;
                 _currentSettings.StartInTray = StartInTrayCheckBox.IsChecked ?? false;
+                
+                // LauncherViewMode
+                _currentSettings.LauncherViewMode = GroupViewRadio.IsChecked == true ? "Group" : "Grid";
                 
                 // LauncherItemsPerRow 유효성 검사
                 if (int.TryParse(LauncherItemsPerRowTextBox.Text, out int itemsPerRow) && itemsPerRow > 0 && itemsPerRow <= 20)
@@ -54,7 +67,7 @@ namespace FACTOVA_Execute.Views
 
                 _repository.UpdateSettings(_currentSettings);
 
-                // 런처 새로고침 (행별 개수 변경 반영)
+                // 런처 새로고침 (행별 개수 및 보기 모드 변경 반영)
                 MainWindow.Instance?.RefreshExecuteTabLauncher();
 
                 MessageBox.Show("일반 설정이 저장되었습니다.", "저장 완료", MessageBoxButton.OK, MessageBoxImage.Information);

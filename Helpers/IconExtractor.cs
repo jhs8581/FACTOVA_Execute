@@ -20,13 +20,23 @@ namespace FACTOVA_Execute.Helpers
         private static extern bool DestroyIcon(IntPtr hIcon);
 
         /// <summary>
-        /// 실행 파일에서 아이콘을 추출하여 ImageSource로 반환
+        /// 실행 파일 또는 폴더에서 아이콘을 추출하여 ImageSource로 반환
         /// </summary>
-        /// <param name="exePath">실행 파일 경로</param>
+        /// <param name="path">실행 파일 또는 폴더 경로</param>
         /// <returns>추출된 아이콘의 ImageSource, 실패 시 null</returns>
-        public static ImageSource? ExtractIconFromFile(string exePath)
+        public static ImageSource? ExtractIconFromFile(string path)
         {
-            if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
+            if (string.IsNullOrEmpty(path))
+                return null;
+
+            // 폴더인 경우 폴더 아이콘 반환
+            if (Directory.Exists(path))
+            {
+                return ExtractFolderIcon(path);
+            }
+
+            // 파일인 경우 파일 아이콘 반환
+            if (!File.Exists(path))
                 return null;
 
             IntPtr hIcon = IntPtr.Zero;
@@ -34,7 +44,7 @@ namespace FACTOVA_Execute.Helpers
             try
             {
                 // 실행 파일에서 첫 번째 아이콘 추출
-                hIcon = ExtractIcon(IntPtr.Zero, exePath, 0);
+                hIcon = ExtractIcon(IntPtr.Zero, path, 0);
 
                 if (hIcon == IntPtr.Zero || hIcon == new IntPtr(1)) // 1은 아이콘이 없음을 의미
                     return null;
@@ -52,12 +62,49 @@ namespace FACTOVA_Execute.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"아이콘 추출 실패 ({exePath}): {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"아이콘 추출 실패 ({path}): {ex.Message}");
                 return null;
             }
             finally
             {
                 // 아이콘 핸들 해제
+                if (hIcon != IntPtr.Zero && hIcon != new IntPtr(1))
+                {
+                    DestroyIcon(hIcon);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 폴더 아이콘 추출
+        /// </summary>
+        private static ImageSource? ExtractFolderIcon(string folderPath)
+        {
+            IntPtr hIcon = IntPtr.Zero;
+
+            try
+            {
+                // Shell32.dll에서 폴더 아이콘 추출 (인덱스 3 = 폴더)
+                hIcon = ExtractIcon(IntPtr.Zero, "shell32.dll", 3);
+
+                if (hIcon == IntPtr.Zero || hIcon == new IntPtr(1))
+                    return null;
+
+                using (Icon icon = Icon.FromHandle(hIcon))
+                {
+                    using (Bitmap bitmap = icon.ToBitmap())
+                    {
+                        return BitmapToImageSource(bitmap);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"폴더 아이콘 추출 실패: {ex.Message}");
+                return null;
+            }
+            finally
+            {
                 if (hIcon != IntPtr.Zero && hIcon != new IntPtr(1))
                 {
                     DestroyIcon(hIcon);

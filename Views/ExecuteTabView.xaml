@@ -27,14 +27,14 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="8"
-                                Padding="10">
+                                Padding="5">
                             <Border.Effect>
                                 <DropShadowEffect Color="#E0E0E0" 
                                                   BlurRadius="8" 
                                                   ShadowDepth="2" 
                                                   Opacity="0.5"/>
                             </Border.Effect>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">

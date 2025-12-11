@@ -17,7 +17,7 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow FROM GeneralSettings LIMIT 1";
+            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode FROM GeneralSettings LIMIT 1";
 
             using var reader = command.ExecuteReader();
             if (reader.Read())
@@ -27,7 +27,8 @@ namespace FACTOVA_Execute.Data
                     Id = reader.GetInt32(0),
                     AutoStartMonitoring = reader.GetInt32(1) == 1,
                     StartInTray = reader.GetInt32(2) == 1,
-                    LauncherItemsPerRow = reader.GetInt32(3)
+                    LauncherItemsPerRow = reader.GetInt32(3),
+                    LauncherViewMode = reader.IsDBNull(4) ? "Grid" : reader.GetString(4)
                 };
             }
 
@@ -36,7 +37,8 @@ namespace FACTOVA_Execute.Data
             {
                 AutoStartMonitoring = true,
                 StartInTray = false,
-                LauncherItemsPerRow = 5
+                LauncherItemsPerRow = 5,
+                LauncherViewMode = "Grid"
             };
         }
 
@@ -53,12 +55,14 @@ namespace FACTOVA_Execute.Data
                 UPDATE GeneralSettings 
                 SET AutoStartMonitoring = @autoStartMonitoring,
                     StartInTray = @startInTray,
-                    LauncherItemsPerRow = @launcherItemsPerRow
+                    LauncherItemsPerRow = @launcherItemsPerRow,
+                    LauncherViewMode = @launcherViewMode
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", settings.Id);
             command.Parameters.AddWithValue("@autoStartMonitoring", settings.AutoStartMonitoring ? 1 : 0);
             command.Parameters.AddWithValue("@startInTray", settings.StartInTray ? 1 : 0);
             command.Parameters.AddWithValue("@launcherItemsPerRow", settings.LauncherItemsPerRow);
+            command.Parameters.AddWithValue("@launcherViewMode", settings.LauncherViewMode);
 
             command.ExecuteNonQuery();
         }

@@ -8,6 +8,7 @@ namespace FACTOVA_Execute.Converters
     /// ExecutionMode 값을 한글 표시명으로 변환하는 컨버터
     /// Network → 네트워크 연결 실행
     /// Trigger → 프로그램 감지 실행
+    /// Launcher → 런처 전용
     /// </summary>
     public class ExecutionModeConverter : IValueConverter
     {
@@ -19,6 +20,7 @@ namespace FACTOVA_Execute.Converters
                 {
                     "Network" => "네트워크 연결 실행",
                     "Trigger" => "프로그램 감지 실행",
+                    "Launcher" => "런처 전용",
                     _ => value
                 };
             }
@@ -33,6 +35,7 @@ namespace FACTOVA_Execute.Converters
                 {
                     "네트워크 연결 실행" => "Network",
                     "프로그램 감지 실행" => "Trigger",
+                    "런처 전용" => "Launcher",
                     _ => value
                 };
             }

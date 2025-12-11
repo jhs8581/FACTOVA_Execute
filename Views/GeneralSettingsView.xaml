@@ -137,8 +137,31 @@
                                    FontSize="16" 
                                    FontWeight="Bold"
                                    Foreground="#212529"
-                                   Margin="0,0,0,10"/>
+                                   Margin="0,0,0,15"/>
                         
+                        <!-- 보기 모드 -->
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="보기 모드:" 
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,8"/>
+                            <RadioButton x:Name="GridViewRadio"
+                                        Content="기본 보기 (그리드)"
+                                        GroupName="LauncherView"
+                                        FontSize="13"
+                                        Margin="0,0,0,5"/>
+                            <RadioButton x:Name="GroupViewRadio"
+                                        Content="그룹별 보기 (타입별로 묶기)"
+                                        GroupName="LauncherView"
+                                        FontSize="13"/>
+                            <TextBlock TextWrapping="Wrap" 
+                                       FontSize="11" 
+                                       Foreground="#6C757D"
+                                       Margin="0,8,0,0"
+                                       Text="• 기본 보기: 모든 프로그램을 그리드 형태로 표시&#x0a;• 그룹별 보기: 실행 모드별로 그룹화하여 표시 (접기/펼치기 가능)"/>
+                        </StackPanel>
+                        
+                        <!-- 행별 개수 -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                             <TextBlock Text="행별 개수:" 
                                        FontSize="14"

@@ -150,24 +150,71 @@
                    Margin="0,0,0,15"/>
 
         <!-- 버튼 영역 (상단) -->
-        <StackPanel Grid.Row="1" 
-                    Orientation="Horizontal" 
-                    Margin="0,0,0,10">
-            <Button x:Name="AddButton" 
-                    Content="+ 프로그램 추가" 
-                    Style="{StaticResource AddButtonStyle}"
-                    Margin="0,0,5,0"
-                    Click="AddButton_Click"/>
-            <Button x:Name="DeleteButton" 
-                    Content="삭제" 
-                    Style="{StaticResource DeleteButtonStyle}"
-                    Margin="0,0,5,0"
-                    Click="DeleteButton_Click"/>
-            <Button x:Name="SaveButton" 
-                    Content="저장" 
-                    Style="{StaticResource SaveButtonStyle}"
-                    Click="SaveButton_Click"/>
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 왼쪽: 추가/삭제/저장 버튼 -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button x:Name="AddButton" 
+                        Content="+ 프로그램 추가" 
+                        Style="{StaticResource AddButtonStyle}"
+                        Margin="0,0,5,0"
+                        Click="AddButton_Click"/>
+                <Button x:Name="AddFolderButton" 
+                        Content="📁 폴더 추가" 
+                        Style="{StaticResource AddButtonStyle}"
+                        Background="#FD7E14"
+                        Margin="0,0,5,0"
+                        Click="AddFolderButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" 
+                                    CornerRadius="3"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#E8590C"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button x:Name="DeleteButton" 
+                        Content="삭제" 
+                        Style="{StaticResource DeleteButtonStyle}"
+                        Margin="0,0,5,0"
+                        Click="DeleteButton_Click"/>
+                <Button x:Name="SaveButton" 
+                        Content="저장" 
+                        Style="{StaticResource SaveButtonStyle}"
+                        Click="SaveButton_Click"/>
+            </StackPanel>
+
+            <!-- 오른쪽: 필터 콤보박스 -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <TextBlock Text="필터:" 
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           Margin="0,0,5,0"/>
+                <ComboBox x:Name="FilterComboBox"
+                          Width="180"
+                          Height="32"
+                          FontSize="13"
+                          SelectionChanged="FilterComboBox_SelectionChanged">
+                    <ComboBoxItem Content="전체" Tag="All" IsSelected="True"/>
+                    <ComboBoxItem Content="네트워크 연결 실행" Tag="Network"/>
+                    <ComboBoxItem Content="프로그램 감지 실행" Tag="Trigger"/>
+                    <ComboBoxItem Content="런처 전용" Tag="Launcher"/>
+                </ComboBox>
+            </StackPanel>
+        </Grid>
 
         <!-- 데이터그리드 -->
         <Border Grid.Row="2" 
@@ -218,6 +265,7 @@
                                           SelectedValuePath="Tag">
                                     <ComboBoxItem Content="네트워크 연결 실행" Tag="Network"/>
                                     <ComboBoxItem Content="프로그램 감지 실행" Tag="Trigger"/>
+                                    <ComboBoxItem Content="런처 전용" Tag="Launcher"/>
                                 </ComboBox>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -237,8 +285,8 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     
-                    <!-- 프로그램명 -->
-                    <DataGridTextColumn Header="프로그램명" 
+                    <!-- 프로그램/폴더명 -->
+                    <DataGridTextColumn Header="프로그램/폴더명" 
                                         Binding="{Binding ProgramName, UpdateSourceTrigger=PropertyChanged}" 
                                         Width="150">
                         <DataGridTextColumn.ElementStyle>
