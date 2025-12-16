@@ -714,39 +714,21 @@ namespace FACTOVA_Execute.Views
         }
 
         /// <summary>
-        /// 프로그램 순서 업데이트
+        /// 프로그램 순서 업데이트 (스왑 방식)
         /// </summary>
         private void UpdateProgramOrders(Models.ProgramInfo draggedProgram, Models.ProgramInfo targetProgram)
         {
             try
             {
-                // 같은 ExecutionMode 내의 프로그램만 대상
-                var programs = _programRepository.GetAllPrograms()
-                    .Where(p => p.IsEnabled && p.ExecutionMode == draggedProgram.ExecutionMode)
-                    .OrderBy(p => p.ExecutionOrder)
-                    .ToList();
-
-                var draggedIndex = programs.FindIndex(p => p.Id == draggedProgram.Id);
-                var targetIndex = programs.FindIndex(p => p.Id == targetProgram.Id);
-
-                if (draggedIndex == -1 || targetIndex == -1 || draggedIndex == targetIndex)
-                    return;
-
-                // 리스트에서 드래그한 항목 제거 후 타겟 위치에 삽입
-                var item = programs[draggedIndex];
-                programs.RemoveAt(draggedIndex);
-                programs.Insert(targetIndex, item);
-
-                // ExecutionOrder 재할당
-                for (int i = 0; i < programs.Count; i++)
-                {
-                    programs[i].ExecutionOrder = i + 1;
-                }
+                // 두 프로그램의 ExecutionOrder를 서로 스왑
+                var tempOrder = draggedProgram.ExecutionOrder;
+                draggedProgram.ExecutionOrder = targetProgram.ExecutionOrder;
+                targetProgram.ExecutionOrder = tempOrder;
 
                 // DB 업데이트
-                _programRepository.UpdateProgramOrders(programs);
+                _programRepository.UpdateProgramOrders(new List<Models.ProgramInfo> { draggedProgram, targetProgram });
 
-                AddLogMessage($"'{draggedProgram.ProgramName}' 순서가 변경되었습니다.", NetworkMonitorService.LogLevel.Info);
+                AddLogMessage($"'{draggedProgram.ProgramName}' ↔ '{targetProgram.ProgramName}' 순서가 교환되었습니다.", NetworkMonitorService.LogLevel.Info);
 
                 // 런처 새로고침
                 LoadLauncher();
@@ -869,7 +851,7 @@ namespace FACTOVA_Execute.Views
         }
 
         /// <summary>
-        /// 로그 초기화
+        /// 로그인 초기화
         /// </summary>
         private void InitializeLog()
         {
