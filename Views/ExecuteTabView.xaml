@@ -8,6 +8,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <!-- 드래그 중인 버튼 스타일 -->
+        <Style x:Key="DraggingButtonStyle" TargetType="Button" BasedOn="{StaticResource LauncherButtonStyle}">
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+        
         <!-- 런처 버튼 스타일 -->
         <Style x:Key="LauncherButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="White"/>
@@ -208,7 +213,10 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="10">
                         <WrapPanel x:Name="LauncherPanel" 
                                    Orientation="Horizontal"
-                                   HorizontalAlignment="Left"/>
+                                   HorizontalAlignment="Left"
+                                   AllowDrop="True"
+                                   Drop="LauncherPanel_Drop"
+                                   DragOver="LauncherPanel_DragOver"/>
                     </ScrollViewer>
                 </Grid>
             </TabItem>

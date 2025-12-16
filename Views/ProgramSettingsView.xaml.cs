@@ -106,6 +106,37 @@ namespace FACTOVA_Execute.Views
         }
 
         /// <summary>
+        /// 아이콘 변경 버튼 클릭
+        /// </summary>
+        private void IconButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                // 버튼이 속한 행의 데이터 가져오기
+                var dataContext = button.DataContext as ProgramInfo;
+                if (dataContext == null)
+                    return;
+
+                var openFileDialog = new OpenFileDialog
+                {
+                    Title = "아이콘 이미지 선택",
+                    Filter = "이미지 파일 (*.png;*.ico;*.jpg;*.jpeg;*.bmp)|*.png;*.ico;*.jpg;*.jpeg;*.bmp|아이콘 파일 (*.ico)|*.ico|PNG 파일 (*.png)|*.png|모든 파일 (*.*)|*.*",
+                    InitialDirectory = string.IsNullOrEmpty(dataContext.IconPath)
+                        ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                        : System.IO.Path.GetDirectoryName(dataContext.IconPath)
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    dataContext.IconPath = openFileDialog.FileName;
+                    ProgramsDataGrid.Items.Refresh();
+                    
+                    MessageBox.Show($"아이콘이 설정되었습니다.\n저장 버튼을 눌러 변경사항을 저장하세요.", "아이콘 설정", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+
+        /// <summary>
         /// 프로그램 추가 버튼 클릭
         /// </summary>
         private void AddButton_Click(object sender, RoutedEventArgs e)

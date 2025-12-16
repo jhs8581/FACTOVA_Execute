@@ -338,6 +338,20 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
+                    <!-- 아이콘변경 버튼 -->
+                    <DataGridTemplateColumn Header="아이콘" Width="100">
+    <DataGridTemplateColumn.CellTemplate>
+        <DataTemplate>
+            <Button Content="🖼 변경" 
+                    Click="IconButton_Click"
+                    Style="{StaticResource BrowseButtonStyle}"
+                    HorizontalAlignment="Center"
+                    Margin="5"
+                    ToolTip="{Binding IconPath}"/>
+        </DataTemplate>
+    </DataGridTemplateColumn.CellTemplate>
+</DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

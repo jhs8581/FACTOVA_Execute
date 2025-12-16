@@ -1,11 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Input;
 using FACTOVA_Execute.Services;
 using FACTOVA_Execute.Helpers;
 using FACTOVA_Execute.Data;
 using ICSharpCode.AvalonEdit.Document;
 using System.Diagnostics;
+using Microsoft.Win32;
 
 namespace FACTOVA_Execute.Views
 {
@@ -20,6 +23,11 @@ namespace FACTOVA_Execute.Views
         private readonly TriggerSettingsRepository _triggerRepository;
         private readonly ProgramRepository _programRepository;
         private bool _isInitialized = false; // 초기화 여부 플래그
+
+        // 드래그 앤 드롭 관련 필드
+        private Button? _draggedButton;
+        private Point _dragStartPoint;
+        private bool _isDragging = false;
 
         public ExecuteTabView()
         {
@@ -250,8 +258,8 @@ namespace FACTOVA_Execute.Views
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // 아이콘 추출 및 추가
-            var iconSource = Helpers.IconExtractor.ExtractIconFromFile(program.ProgramPath);
+            // 아이콘 가져오기 (커스텀 아이콘 우선, 없으면 프로그램에서 추출)
+            var iconSource = GetProgramIcon(program);
             if (iconSource != null)
             {
                 var iconImage = new System.Windows.Controls.Image
@@ -280,6 +288,9 @@ namespace FACTOVA_Execute.Views
             Grid.SetColumn(textBlock, 1);
             grid.Children.Add(textBlock);
 
+            // 컨텍스트 메뉴 생성
+            var contextMenu = CreateButtonContextMenu(program);
+
             // 버튼 생성
             var button = new Button
             {
@@ -288,12 +299,465 @@ namespace FACTOVA_Execute.Views
                 Width = buttonWidth,
                 Tag = program,
                 HorizontalContentAlignment = System.Windows.HorizontalAlignment.Stretch,
-                Padding = new Thickness(5)
+                Padding = new Thickness(5),
+                ContextMenu = contextMenu
             };
             button.Click += LauncherButton_Click;
 
+            // 드래그 앤 드롭 이벤트 연결
+            button.PreviewMouseLeftButtonDown += LauncherButton_PreviewMouseLeftButtonDown;
+            button.PreviewMouseMove += LauncherButton_PreviewMouseMove;
+            button.PreviewMouseLeftButtonUp += LauncherButton_PreviewMouseLeftButtonUp;
+
             return button;
         }
+
+        /// <summary>
+        /// 프로그램 아이콘 가져오기 (커스텀 아이콘 우선)
+        /// </summary>
+        private ImageSource? GetProgramIcon(Models.ProgramInfo program)
+        {
+            // 커스텀 아이콘 경로가 있으면 먼저 시도
+            if (!string.IsNullOrWhiteSpace(program.IconPath) && System.IO.File.Exists(program.IconPath))
+            {
+                try
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(program.IconPath, UriKind.Absolute);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                    return bitmap;
+                }
+                catch
+                {
+                    // 커스텀 아이콘 로드 실패 시 기본 아이콘으로 폴백
+                }
+            }
+
+            // 기본: 프로그램 파일에서 아이콘 추출
+            return Helpers.IconExtractor.ExtractIconFromFile(program.ProgramPath);
+        }
+
+        /// <summary>
+        /// 버튼 컨텍스트 메뉴 생성
+        /// </summary>
+        private ContextMenu CreateButtonContextMenu(Models.ProgramInfo program)
+        {
+            var contextMenu = new ContextMenu();
+
+            // 경로 열기 메뉴
+            var openFolderItem = new MenuItem
+            {
+                Header = "📂 파일 위치 열기",
+                Tag = program
+            };
+            openFolderItem.Click += ContextMenu_OpenFolder_Click;
+            contextMenu.Items.Add(openFolderItem);
+
+            // 경로 복사 메뉴
+            var copyPathItem = new MenuItem
+            {
+                Header = "📋 경로 복사",
+                Tag = program
+            };
+            copyPathItem.Click += ContextMenu_CopyPath_Click;
+            contextMenu.Items.Add(copyPathItem);
+
+            // 구분선
+            contextMenu.Items.Add(new Separator());
+
+            // 아이콘 변경 메뉴
+            var changeIconItem = new MenuItem
+            {
+                Header = "🖼 아이콘 변경",
+                Tag = program
+            };
+            changeIconItem.Click += ContextMenu_ChangeIcon_Click;
+            contextMenu.Items.Add(changeIconItem);
+
+            // 아이콘 초기화 메뉴 (커스텀 아이콘이 설정된 경우에만 표시)
+            if (!string.IsNullOrWhiteSpace(program.IconPath))
+            {
+                var resetIconItem = new MenuItem
+                {
+                    Header = "🔄 아이콘 초기화",
+                    Tag = program
+                };
+                resetIconItem.Click += ContextMenu_ResetIcon_Click;
+                contextMenu.Items.Add(resetIconItem);
+            }
+
+            return contextMenu;
+        }
+
+        /// <summary>
+        /// 컨텍스트 메뉴 - 파일 위치 열기
+        /// </summary>
+        private void ContextMenu_OpenFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.Tag is Models.ProgramInfo program)
+            {
+                try
+                {
+                    var path = program.ProgramPath;
+                    
+                    if (program.IsFolder)
+                    {
+                        // 폴더인 경우 해당 폴더 열기
+                        if (System.IO.Directory.Exists(path))
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "explorer.exe",
+                                Arguments = path,
+                                UseShellExecute = true
+                            });
+                            AddLogMessage($"폴더 열기: {path}", NetworkMonitorService.LogLevel.Info);
+                        }
+                        else
+                        {
+                            AddLogMessage($"폴더를 찾을 수 없습니다: {path}", NetworkMonitorService.LogLevel.Error);
+                        }
+                    }
+                    else
+                    {
+                        // 파일인 경우 파일이 있는 폴더를 열고 파일 선택
+                        if (System.IO.File.Exists(path))
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "explorer.exe",
+                                Arguments = $"/select,\"{path}\"",
+                                UseShellExecute = true
+                            });
+                            AddLogMessage($"파일 위치 열기: {path}", NetworkMonitorService.LogLevel.Info);
+                        }
+                        else
+                        {
+                            AddLogMessage($"파일을 찾을 수 없습니다: {path}", NetworkMonitorService.LogLevel.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AddLogMessage($"경로 열기 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 컨텍스트 메뉴 - 경로 복사
+        /// </summary>
+        private void ContextMenu_CopyPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.Tag is Models.ProgramInfo program)
+            {
+                try
+                {
+                    Clipboard.SetText(program.ProgramPath);
+                    AddLogMessage($"경로가 클립보드에 복사되었습니다: {program.ProgramPath}", NetworkMonitorService.LogLevel.Info);
+                }
+                catch (Exception ex)
+                {
+                    AddLogMessage($"경로 복사 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 컨텍스트 메뉴 - 아이콘 변경
+        /// </summary>
+        private void ContextMenu_ChangeIcon_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.Tag is Models.ProgramInfo program)
+            {
+                var openFileDialog = new OpenFileDialog
+                {
+                    Title = "아이콘 이미지 선택",
+                    Filter = "이미지 파일 (*.png;*.ico;*.jpg;*.jpeg;*.bmp)|*.png;*.ico;*.jpg;*.jpeg;*.bmp|아이콘 파일 (*.ico)|*.ico|PNG 파일 (*.png)|*.png|모든 파일 (*.*)|*.*",
+                    InitialDirectory = string.IsNullOrEmpty(program.IconPath)
+                        ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                        : System.IO.Path.GetDirectoryName(program.IconPath)
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        program.IconPath = openFileDialog.FileName;
+                        _programRepository.UpdateProgram(program);
+                        
+                        AddLogMessage($"'{program.ProgramName}' 아이콘이 변경되었습니다.", NetworkMonitorService.LogLevel.Info);
+                        
+                        // 런처 새로고침
+                        LoadLauncher();
+                    }
+                    catch (Exception ex)
+                    {
+                        AddLogMessage($"아이콘 변경 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 컨텍스트 메뉴 - 아이콘 초기화
+        /// </summary>
+        private void ContextMenu_ResetIcon_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.Tag is Models.ProgramInfo program)
+            {
+                try
+                {
+                    program.IconPath = string.Empty;
+                    _programRepository.UpdateProgram(program);
+                    
+                    AddLogMessage($"'{program.ProgramName}' 아이콘이 초기화되었습니다.", NetworkMonitorService.LogLevel.Info);
+                    
+                    // 런처 새로고침
+                    LoadLauncher();
+                }
+                catch (Exception ex)
+                {
+                    AddLogMessage($"아이콘 초기화 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                }
+            }
+        }
+
+        #region 드래그 앤 드롭 이벤트 핸들러
+
+        /// <summary>
+        /// 버튼 마우스 왼쪽 버튼 누름
+        /// </summary>
+        private void LauncherButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                _dragStartPoint = e.GetPosition(null);
+                _draggedButton = button;
+            }
+        }
+
+        /// <summary>
+        /// 버튼 마우스 이동
+        /// </summary>
+        private void LauncherButton_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && _draggedButton != null && !_isDragging)
+            {
+                var currentPosition = e.GetPosition(null);
+                var diff = _dragStartPoint - currentPosition;
+
+                // 최소 이동 거리 확인
+                if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+                {
+                    _isDragging = true;
+
+                    // 드래그 시작 시 시각적 피드백
+                    _draggedButton.Opacity = 0.5;
+
+                    // 드래그 데이터 설정
+                    var data = new DataObject("LauncherButton", _draggedButton);
+                    DragDrop.DoDragDrop(_draggedButton, data, DragDropEffects.Move);
+
+                    // 드래그 완료 후 복원
+                    if (_draggedButton != null)
+                    {
+                        _draggedButton.Opacity = 1.0;
+                    }
+                    _isDragging = false;
+                    _draggedButton = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 버튼 마우스 왼쪽 버튼 뗌
+        /// </summary>
+        private void LauncherButton_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _draggedButton = null;
+            _isDragging = false;
+        }
+
+        /// <summary>
+        /// 런처 패널 드래그 오버
+        /// </summary>
+        private void LauncherPanel_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("LauncherButton"))
+            {
+                e.Effects = DragDropEffects.Move;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 런처 패널 드롭
+        /// </summary>
+        private void LauncherPanel_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent("LauncherButton"))
+                return;
+
+            var draggedButton = e.Data.GetData("LauncherButton") as Button;
+            if (draggedButton == null)
+                return;
+
+            var draggedProgram = draggedButton.Tag as Models.ProgramInfo;
+            if (draggedProgram == null)
+                return;
+
+            // 드롭 위치에서 타겟 버튼 찾기
+            var dropPosition = e.GetPosition(LauncherPanel);
+            Button? targetButton = null;
+            int targetIndex = -1;
+
+            // 현재 보기 모드 확인
+            var settings = _generalRepository.GetSettings();
+            var viewMode = settings.LauncherViewMode;
+
+            if (viewMode == "Group")
+            {
+                // 그룹 보기 모드: 같은 그룹 내에서만 이동
+                targetButton = FindTargetButtonInGroupView(dropPosition, draggedProgram.ExecutionMode, out targetIndex);
+            }
+            else
+            {
+                // 그리드 보기 모드
+                targetButton = FindTargetButtonInGridView(dropPosition, out targetIndex);
+            }
+
+            if (targetButton == null || targetButton == draggedButton)
+                return;
+
+            var targetProgram = targetButton.Tag as Models.ProgramInfo;
+            if (targetProgram == null)
+                return;
+
+            // 그룹 보기 모드에서 다른 그룹으로 이동 방지
+            if (viewMode == "Group" && draggedProgram.ExecutionMode != targetProgram.ExecutionMode)
+            {
+                AddLogMessage("같은 그룹 내에서만 순서를 변경할 수 있습니다.", NetworkMonitorService.LogLevel.Warning);
+                return;
+            }
+
+            // 순서 업데이트
+            UpdateProgramOrders(draggedProgram, targetProgram);
+
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 그리드 보기에서 타겟 버튼 찾기
+        /// </summary>
+        private Button? FindTargetButtonInGridView(Point dropPosition, out int targetIndex)
+        {
+            targetIndex = -1;
+            
+            for (int i = 0; i < LauncherPanel.Children.Count; i++)
+            {
+                if (LauncherPanel.Children[i] is Button button)
+                {
+                    var buttonPosition = button.TranslatePoint(new Point(0, 0), LauncherPanel);
+                    var buttonRect = new Rect(buttonPosition, new Size(button.ActualWidth, button.ActualHeight));
+
+                    if (buttonRect.Contains(dropPosition))
+                    {
+                        targetIndex = i;
+                        return button;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 그룹 보기에서 타겟 버튼 찾기
+        /// </summary>
+        private Button? FindTargetButtonInGroupView(Point dropPosition, string executionMode, out int targetIndex)
+        {
+            targetIndex = -1;
+
+            // 모든 Expander 내의 WrapPanel 탐색
+            foreach (var child in LauncherPanel.Children)
+            {
+                if (child is Border border && border.Child is Expander expander && expander.Content is WrapPanel wrapPanel)
+                {
+                    for (int i = 0; i < wrapPanel.Children.Count; i++)
+                    {
+                        if (wrapPanel.Children[i] is Button button && button.Tag is Models.ProgramInfo program)
+                        {
+                            if (program.ExecutionMode == executionMode)
+                            {
+                                var buttonPosition = button.TranslatePoint(new Point(0, 0), LauncherPanel);
+                                var buttonRect = new Rect(buttonPosition, new Size(button.ActualWidth, button.ActualHeight));
+
+                                if (buttonRect.Contains(dropPosition))
+                                {
+                                    targetIndex = i;
+                                    return button;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 프로그램 순서 업데이트
+        /// </summary>
+        private void UpdateProgramOrders(Models.ProgramInfo draggedProgram, Models.ProgramInfo targetProgram)
+        {
+            try
+            {
+                // 같은 ExecutionMode 내의 프로그램만 대상
+                var programs = _programRepository.GetAllPrograms()
+                    .Where(p => p.IsEnabled && p.ExecutionMode == draggedProgram.ExecutionMode)
+                    .OrderBy(p => p.ExecutionOrder)
+                    .ToList();
+
+                var draggedIndex = programs.FindIndex(p => p.Id == draggedProgram.Id);
+                var targetIndex = programs.FindIndex(p => p.Id == targetProgram.Id);
+
+                if (draggedIndex == -1 || targetIndex == -1 || draggedIndex == targetIndex)
+                    return;
+
+                // 리스트에서 드래그한 항목 제거 후 타겟 위치에 삽입
+                var item = programs[draggedIndex];
+                programs.RemoveAt(draggedIndex);
+                programs.Insert(targetIndex, item);
+
+                // ExecutionOrder 재할당
+                for (int i = 0; i < programs.Count; i++)
+                {
+                    programs[i].ExecutionOrder = i + 1;
+                }
+
+                // DB 업데이트
+                _programRepository.UpdateProgramOrders(programs);
+
+                AddLogMessage($"'{draggedProgram.ProgramName}' 순서가 변경되었습니다.", NetworkMonitorService.LogLevel.Info);
+
+                // 런처 새로고침
+                LoadLauncher();
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"순서 변경 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 그룹 표시명 가져오기

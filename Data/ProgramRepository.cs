@@ -20,7 +20,7 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder, IsFolder FROM Programs ORDER BY ExecutionMode, ExecutionOrder";
+            command.CommandText = "SELECT Id, IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder, IsFolder, IconPath FROM Programs ORDER BY ExecutionMode, ExecutionOrder";
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
@@ -34,7 +34,8 @@ namespace FACTOVA_Execute.Data
                     ProcessName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
                     ExecutionMode = reader.IsDBNull(5) ? "Network" : reader.GetString(5),
                     ExecutionOrder = reader.IsDBNull(6) ? 1 : reader.GetInt32(6),
-                    IsFolder = reader.IsDBNull(7) ? false : reader.GetInt32(7) == 1
+                    IsFolder = reader.IsDBNull(7) ? false : reader.GetInt32(7) == 1,
+                    IconPath = reader.IsDBNull(8) ? string.Empty : reader.GetString(8)
                 });
             }
 
@@ -51,8 +52,8 @@ namespace FACTOVA_Execute.Data
 
             var command = connection.CreateCommand();
             command.CommandText = @"
-                INSERT INTO Programs (IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder, IsFolder) 
-                VALUES (@isEnabled, @programName, @programPath, @processName, @executionMode, @executionOrder, @isFolder)";
+                INSERT INTO Programs (IsEnabled, ProgramName, ProgramPath, ProcessName, ExecutionMode, ExecutionOrder, IsFolder, IconPath) 
+                VALUES (@isEnabled, @programName, @programPath, @processName, @executionMode, @executionOrder, @isFolder, @iconPath)";
             command.Parameters.AddWithValue("@isEnabled", program.IsEnabled ? 1 : 0);
             command.Parameters.AddWithValue("@programName", program.ProgramName);
             command.Parameters.AddWithValue("@programPath", program.ProgramPath);
@@ -60,6 +61,7 @@ namespace FACTOVA_Execute.Data
             command.Parameters.AddWithValue("@executionMode", program.ExecutionMode);
             command.Parameters.AddWithValue("@executionOrder", program.ExecutionOrder);
             command.Parameters.AddWithValue("@isFolder", program.IsFolder ? 1 : 0);
+            command.Parameters.AddWithValue("@iconPath", program.IconPath ?? string.Empty);
 
             command.ExecuteNonQuery();
         }
@@ -81,7 +83,8 @@ namespace FACTOVA_Execute.Data
                     ProcessName = @processName,
                     ExecutionMode = @executionMode,
                     ExecutionOrder = @executionOrder,
-                    IsFolder = @isFolder
+                    IsFolder = @isFolder,
+                    IconPath = @iconPath
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", program.Id);
             command.Parameters.AddWithValue("@isEnabled", program.IsEnabled ? 1 : 0);
@@ -91,6 +94,7 @@ namespace FACTOVA_Execute.Data
             command.Parameters.AddWithValue("@executionMode", program.ExecutionMode);
             command.Parameters.AddWithValue("@executionOrder", program.ExecutionOrder);
             command.Parameters.AddWithValue("@isFolder", program.IsFolder ? 1 : 0);
+            command.Parameters.AddWithValue("@iconPath", program.IconPath ?? string.Empty);
 
             command.ExecuteNonQuery();
         }
@@ -108,6 +112,36 @@ namespace FACTOVA_Execute.Data
             command.Parameters.AddWithValue("@id", id);
 
             command.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// 프로그램 순서 일괄 업데이트
+        /// </summary>
+        public void UpdateProgramOrders(List<ProgramInfo> programs)
+        {
+            using var connection = new SqliteConnection(DatabaseInitializer.ConnectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                foreach (var program in programs)
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = "UPDATE Programs SET ExecutionOrder = @executionOrder WHERE Id = @id";
+                    command.Parameters.AddWithValue("@id", program.Id);
+                    command.Parameters.AddWithValue("@executionOrder", program.ExecutionOrder);
+                    command.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
     }
 }

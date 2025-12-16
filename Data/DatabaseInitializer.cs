@@ -30,7 +30,8 @@ namespace FACTOVA_Execute.Data
                     ProcessName TEXT NOT NULL DEFAULT '',
                     ExecutionMode TEXT NOT NULL DEFAULT 'Network',
                     ExecutionOrder INTEGER NOT NULL DEFAULT 1,
-                    IsFolder INTEGER NOT NULL DEFAULT 0
+                    IsFolder INTEGER NOT NULL DEFAULT 0,
+                    IconPath TEXT NOT NULL DEFAULT ''
                 );
             ";
             command.ExecuteNonQuery();
@@ -152,6 +153,13 @@ namespace FACTOVA_Execute.Data
                 if (!columns.Contains("IsFolder"))
                 {
                     command.CommandText = "ALTER TABLE Programs ADD COLUMN IsFolder INTEGER NOT NULL DEFAULT 0";
+                    command.ExecuteNonQuery();
+                }
+
+                // IconPath 컬럼이 없으면 추가
+                if (!columns.Contains("IconPath"))
+                {
+                    command.CommandText = "ALTER TABLE Programs ADD COLUMN IconPath TEXT NOT NULL DEFAULT ''";
                     command.ExecuteNonQuery();
                 }
             }

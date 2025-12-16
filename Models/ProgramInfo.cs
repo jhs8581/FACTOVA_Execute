@@ -15,6 +15,7 @@ namespace FACTOVA_Execute.Models
         private string _executionMode = "Network"; // 실행 모드: Network 또는 Trigger
         private int _executionOrder = 1; // 실행 순서
         private bool _isFolder = false; // 폴더 여부
+        private string _iconPath = string.Empty; // 커스텀 아이콘 경로
 
         public int Id
         {
@@ -106,6 +107,19 @@ namespace FACTOVA_Execute.Models
             {
                 _isFolder = value;
                 OnPropertyChanged(nameof(IsFolder));
+            }
+        }
+
+        /// <summary>
+        /// 커스텀 아이콘 경로 (비어있으면 프로그램에서 추출)
+        /// </summary>
+        public string IconPath
+        {
+            get => _iconPath;
+            set
+            {
+                _iconPath = value;
+                OnPropertyChanged(nameof(IconPath));
             }
         }
 
