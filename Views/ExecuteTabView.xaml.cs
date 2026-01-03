@@ -908,6 +908,8 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
+                AddLogMessage("모니터링을 중지합니다...", NetworkMonitorService.LogLevel.Warning);
+                
                 _networkMonitorService?.StopMonitoring();
                 _networkMonitorService?.Dispose();
                 _networkMonitorService = null;
@@ -918,6 +920,8 @@ namespace FACTOVA_Execute.Views
 
                 StartMonitorButton.IsEnabled = true;
                 StopMonitorButton.IsEnabled = false;
+                
+                AddLogMessage("모니터링이 중지되었습니다.", NetworkMonitorService.LogLevel.Info);
             }
             catch (Exception ex)
             {

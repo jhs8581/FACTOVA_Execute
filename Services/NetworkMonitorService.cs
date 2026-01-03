@@ -18,6 +18,7 @@ namespace FACTOVA_Execute.Services
         private System.Timers.Timer? _monitorTimer;
         private bool _isNetworkConnected = false;
         private bool _isProgramsStarted = false;
+        private CancellationTokenSource? _cancellationTokenSource;
 
         public event Action<string, LogLevel>? LogMessageReceived;
         public event Action? AllProgramsStarted; // 모든 프로그램 실행 완료 이벤트
@@ -45,16 +46,19 @@ namespace FACTOVA_Execute.Services
             
             _monitorTimer?.Stop();
             _monitorTimer?.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = new CancellationTokenSource();
 
             _monitorTimer = new System.Timers.Timer(settings.CheckIntervalSeconds * 1000);
-            _monitorTimer.Elapsed += async (s, e) => await CheckNetworkAndStartPrograms();
+            _monitorTimer.Elapsed += async (s, e) => await CheckNetworkAndStartPrograms(_cancellationTokenSource.Token);
             _monitorTimer.AutoReset = true;
             _monitorTimer.Start();
 
             LogMessage("네트워크 모니터링을 시작했습니다.", LogLevel.Info);
             
             // 즉시 한번 체크
-            Task.Run(async () => await CheckNetworkAndStartPrograms());
+            Task.Run(async () => await CheckNetworkAndStartPrograms(_cancellationTokenSource.Token));
         }
 
         /// <summary>
@@ -66,16 +70,21 @@ namespace FACTOVA_Execute.Services
             _monitorTimer?.Dispose();
             _monitorTimer = null;
             
+            // 실행 중인 작업 즉시 취소
+            _cancellationTokenSource?.Cancel();
+            
             LogMessage("네트워크 모니터링을 중지했습니다.", LogLevel.Warning);
         }
 
         /// <summary>
         /// 네트워크 확인 및 프로그램 실행
         /// </summary>
-        private async Task CheckNetworkAndStartPrograms()
+        private async Task CheckNetworkAndStartPrograms(CancellationToken cancellationToken)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 var settings = _networkRepository.GetSettings();
                 
                 // 모든 체크 타입의 주소 가져오기
@@ -98,6 +107,8 @@ namespace FACTOVA_Execute.Services
                 // Ping, HTTP, TCP 순서로 체크
                 foreach (var kvp in allAddresses)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
                     var checkType = kvp.Key;
                     var addresses = kvp.Value;
 
@@ -111,6 +122,8 @@ namespace FACTOVA_Execute.Services
 
                     foreach (var address in addresses)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        
                         LogMessage($"    → {address} 확인 중...", LogLevel.Info);
 
                         bool result = false;
@@ -119,15 +132,19 @@ namespace FACTOVA_Execute.Services
                             switch (checkType)
                             {
                                 case "Ping":
-                                    result = await TestPingAsync(address, settings.TimeoutMs);
+                                    result = await TestPingAsync(address, settings.TimeoutMs, cancellationToken);
                                     break;
                                 case "HTTP":
-                                    result = await TestHttpAsync(address, settings.TimeoutMs);
+                                    result = await TestHttpAsync(address, settings.TimeoutMs, cancellationToken);
                                     break;
                                 case "TCP":
-                                    result = await TestTcpAsync(address, settings.Port, settings.TimeoutMs);
+                                    result = await TestTcpAsync(address, settings.Port, settings.TimeoutMs, cancellationToken);
                                     break;
                             }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            throw; // 취소 예외는 상위로 전파
                         }
                         catch (Exception ex)
                         {
@@ -156,6 +173,8 @@ namespace FACTOVA_Execute.Services
                     }
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (isConnected && !_isNetworkConnected)
                 {
                     _isNetworkConnected = true;
@@ -178,13 +197,17 @@ namespace FACTOVA_Execute.Services
                     
                     // 재시도 대기
                     LogMessage($"{settings.RetryDelaySeconds}초 후 재시도합니다...", LogLevel.Warning);
-                    await Task.Delay(settings.RetryDelaySeconds * 1000);
+                    await Task.Delay(settings.RetryDelaySeconds * 1000, cancellationToken);
                 }
                 else if (!isConnected)
                 {
                     LogMessage($"모든 주소 연결 실패. {settings.RetryDelaySeconds}초 후 재시도...", LogLevel.Warning);
-                    await Task.Delay(settings.RetryDelaySeconds * 1000);
+                    await Task.Delay(settings.RetryDelaySeconds * 1000, cancellationToken);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                LogMessage("네트워크 확인 작업이 취소되었습니다.", LogLevel.Info);
             }
             catch (Exception ex)
             {
@@ -277,13 +300,18 @@ namespace FACTOVA_Execute.Services
         /// <summary>
         /// Ping 테스트
         /// </summary>
-        private async Task<bool> TestPingAsync(string address, int timeout)
+        private async Task<bool> TestPingAsync(string address, int timeout, CancellationToken cancellationToken)
         {
             try
             {
                 using var ping = new Ping();
                 var reply = await ping.SendPingAsync(address, timeout);
+                cancellationToken.ThrowIfCancellationRequested();
                 return reply.Status == IPStatus.Success;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch
             {
@@ -294,13 +322,17 @@ namespace FACTOVA_Execute.Services
         /// <summary>
         /// HTTP 테스트
         /// </summary>
-        private async Task<bool> TestHttpAsync(string url, int timeout)
+        private async Task<bool> TestHttpAsync(string url, int timeout, CancellationToken cancellationToken)
         {
             try
             {
                 using var httpClient = new HttpClient { Timeout = TimeSpan.FromMilliseconds(timeout) };
-                var response = await httpClient.GetAsync(url);
+                var response = await httpClient.GetAsync(url, cancellationToken);
                 return response.IsSuccessStatusCode;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch
             {
@@ -311,16 +343,21 @@ namespace FACTOVA_Execute.Services
         /// <summary>
         /// TCP 테스트
         /// </summary>
-        private async Task<bool> TestTcpAsync(string address, int port, int timeout)
+        private async Task<bool> TestTcpAsync(string address, int port, int timeout, CancellationToken cancellationToken)
         {
             try
             {
                 using var client = new System.Net.Sockets.TcpClient();
                 var connectTask = client.ConnectAsync(address, port);
-                var timeoutTask = Task.Delay(timeout);
+                var timeoutTask = Task.Delay(timeout, cancellationToken);
 
                 var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+                cancellationToken.ThrowIfCancellationRequested();
                 return completedTask == connectTask && client.Connected;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch
             {
@@ -340,6 +377,8 @@ namespace FACTOVA_Execute.Services
         {
             _monitorTimer?.Stop();
             _monitorTimer?.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
         }
     }
 }

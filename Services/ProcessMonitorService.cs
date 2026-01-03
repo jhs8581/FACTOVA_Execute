@@ -15,6 +15,7 @@ namespace FACTOVA_Execute.Services
         private System.Timers.Timer? _monitorTimer;
         private HashSet<string> _detectedProcesses = new HashSet<string>();
         private bool _isProgramsStarted = false;
+        private CancellationTokenSource? _cancellationTokenSource;
 
         public event Action<string, LogLevel>? LogMessageReceived;
         public event Action? AllProgramsStarted;
@@ -42,16 +43,19 @@ namespace FACTOVA_Execute.Services
 
             _monitorTimer?.Stop();
             _monitorTimer?.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = new CancellationTokenSource();
 
             _monitorTimer = new System.Timers.Timer(settings.CheckIntervalSeconds * 1000);
-            _monitorTimer.Elapsed += async (s, e) => await CheckProcessAndStartPrograms();
+            _monitorTimer.Elapsed += async (s, e) => await CheckProcessAndStartPrograms(_cancellationTokenSource.Token);
             _monitorTimer.AutoReset = true;
             _monitorTimer.Start();
 
             LogMessage("프로세스 모니터링을 시작했습니다.", LogLevel.Info);
 
             // 즉시 한번 체크
-            Task.Run(async () => await CheckProcessAndStartPrograms());
+            Task.Run(async () => await CheckProcessAndStartPrograms(_cancellationTokenSource.Token));
         }
 
         /// <summary>
@@ -63,16 +67,21 @@ namespace FACTOVA_Execute.Services
             _monitorTimer?.Dispose();
             _monitorTimer = null;
 
+            // 실행 중인 작업 즉시 취소
+            _cancellationTokenSource?.Cancel();
+
             LogMessage("프로세스 모니터링을 중지했습니다.", LogLevel.Warning);
         }
 
         /// <summary>
         /// 프로세스 확인 및 프로그램 실행
         /// </summary>
-        private async Task CheckProcessAndStartPrograms()
+        private async Task CheckProcessAndStartPrograms(CancellationToken cancellationToken)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 var settings = _triggerRepository.GetSettings();
 
                 if (string.IsNullOrWhiteSpace(settings.TargetProcesses))
@@ -100,6 +109,8 @@ namespace FACTOVA_Execute.Services
 
                 foreach (var processName in targetProcesses)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
                     try
                     {
                         var processes = Process.GetProcessesByName(processName);
@@ -134,6 +145,8 @@ namespace FACTOVA_Execute.Services
                     }
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // 프로세스 감지 및 아직 프로그램을 실행하지 않은 경우
                 if (processDetected && !_isProgramsStarted)
                 {
@@ -153,6 +166,10 @@ namespace FACTOVA_Execute.Services
                     _detectedProcesses.Clear();
                     LogMessage("모든 트리거 프로세스가 종료되었습니다.", LogLevel.Warning);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                LogMessage("프로세스 확인 작업이 취소되었습니다.", LogLevel.Info);
             }
             catch (Exception ex)
             {
@@ -254,6 +271,8 @@ namespace FACTOVA_Execute.Services
         {
             _monitorTimer?.Stop();
             _monitorTimer?.Dispose();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
         }
     }
 }
