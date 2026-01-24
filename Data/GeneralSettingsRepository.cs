@@ -17,7 +17,7 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode FROM GeneralSettings LIMIT 1";
+            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode, EnableNetworkMonitoring, NetworkCheckIntervalSeconds FROM GeneralSettings LIMIT 1";
 
             using var reader = command.ExecuteReader();
             if (reader.Read())
@@ -28,7 +28,9 @@ namespace FACTOVA_Execute.Data
                     AutoStartMonitoring = reader.GetInt32(1) == 1,
                     StartInTray = reader.GetInt32(2) == 1,
                     LauncherItemsPerRow = reader.GetInt32(3),
-                    LauncherViewMode = reader.IsDBNull(4) ? "Grid" : reader.GetString(4)
+                    LauncherViewMode = reader.IsDBNull(4) ? "Grid" : reader.GetString(4),
+                    EnableNetworkMonitoring = !reader.IsDBNull(5) && reader.GetInt32(5) == 1,
+                    NetworkCheckIntervalSeconds = reader.IsDBNull(6) ? 5 : reader.GetInt32(6)
                 };
             }
 
@@ -38,7 +40,9 @@ namespace FACTOVA_Execute.Data
                 AutoStartMonitoring = true,
                 StartInTray = false,
                 LauncherItemsPerRow = 5,
-                LauncherViewMode = "Grid"
+                LauncherViewMode = "Grid",
+                EnableNetworkMonitoring = false,
+                NetworkCheckIntervalSeconds = 5
             };
         }
 
@@ -56,13 +60,17 @@ namespace FACTOVA_Execute.Data
                 SET AutoStartMonitoring = @autoStartMonitoring,
                     StartInTray = @startInTray,
                     LauncherItemsPerRow = @launcherItemsPerRow,
-                    LauncherViewMode = @launcherViewMode
+                    LauncherViewMode = @launcherViewMode,
+                    EnableNetworkMonitoring = @enableNetworkMonitoring,
+                    NetworkCheckIntervalSeconds = @networkCheckIntervalSeconds
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", settings.Id);
             command.Parameters.AddWithValue("@autoStartMonitoring", settings.AutoStartMonitoring ? 1 : 0);
             command.Parameters.AddWithValue("@startInTray", settings.StartInTray ? 1 : 0);
             command.Parameters.AddWithValue("@launcherItemsPerRow", settings.LauncherItemsPerRow);
             command.Parameters.AddWithValue("@launcherViewMode", settings.LauncherViewMode);
+            command.Parameters.AddWithValue("@enableNetworkMonitoring", settings.EnableNetworkMonitoring ? 1 : 0);
+            command.Parameters.AddWithValue("@networkCheckIntervalSeconds", settings.NetworkCheckIntervalSeconds);
 
             command.ExecuteNonQuery();
         }

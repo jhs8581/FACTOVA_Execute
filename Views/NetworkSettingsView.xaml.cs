@@ -53,9 +53,34 @@ namespace FACTOVA_Execute.Views
         {
             _currentSettings = _repository.GetSettings();
 
-            CheckTypeComboBox.SelectedItem = CheckTypeComboBox.Items
+            // 디버그: 로드된 값 확인
+            System.Diagnostics.Debug.WriteLine($"=== 로드된 설정 ===");
+            System.Diagnostics.Debug.WriteLine($"CheckType: {_currentSettings.CheckType}");
+            System.Diagnostics.Debug.WriteLine($"PingAddresses: {_currentSettings.PingAddresses}");
+            System.Diagnostics.Debug.WriteLine($"HttpAddresses: {_currentSettings.HttpAddresses}");
+            System.Diagnostics.Debug.WriteLine($"TcpAddresses: {_currentSettings.TcpAddresses}");
+
+            // CheckType이 비어있으면 기본값 설정
+            if (string.IsNullOrWhiteSpace(_currentSettings.CheckType))
+            {
+                _currentSettings.CheckType = "Ping";
+            }
+
+            // 체크 타입 선택 (없으면 Ping 기본 선택)
+            var matchedItem = CheckTypeComboBox.Items
                 .Cast<ComboBoxItem>()
                 .FirstOrDefault(item => item.Content.ToString() == _currentSettings.CheckType);
+            
+            if (matchedItem != null)
+            {
+                CheckTypeComboBox.SelectedItem = matchedItem;
+            }
+            else
+            {
+                // 기본값: Ping 선택
+                CheckTypeComboBox.SelectedIndex = 0;
+                _currentSettings.CheckType = "Ping";
+            }
 
             // 현재 선택된 체크 타입에 맞는 주소 로드
             UpdateAddressesForCheckType();
@@ -176,6 +201,13 @@ namespace FACTOVA_Execute.Views
                 _currentSettings.TimeoutMs = int.Parse(TimeoutTextBox.Text);
                 _currentSettings.RetryDelaySeconds = int.Parse(RetryDelayTextBox.Text);
                 _currentSettings.CheckIntervalSeconds = int.Parse(CheckIntervalTextBox.Text);
+
+                // 디버그: 저장 전 값 확인
+                System.Diagnostics.Debug.WriteLine($"=== 저장할 설정 ===");
+                System.Diagnostics.Debug.WriteLine($"CheckType: {_currentSettings.CheckType}");
+                System.Diagnostics.Debug.WriteLine($"PingAddresses: {_currentSettings.PingAddresses}");
+                System.Diagnostics.Debug.WriteLine($"HttpAddresses: {_currentSettings.HttpAddresses}");
+                System.Diagnostics.Debug.WriteLine($"TcpAddresses: {_currentSettings.TcpAddresses}");
 
                 _repository.UpdateSettings(_currentSettings);
 

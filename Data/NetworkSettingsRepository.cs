@@ -27,7 +27,7 @@ namespace FACTOVA_Execute.Data
                 return new NetworkSettings
                 {
                     Id = reader.GetInt32(0),
-                    CheckType = reader.GetString(1),
+                    CheckType = reader.IsDBNull(1) ? "Ping" : reader.GetString(1),
                     PingAddresses = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
                     HttpAddresses = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
                     TcpAddresses = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),

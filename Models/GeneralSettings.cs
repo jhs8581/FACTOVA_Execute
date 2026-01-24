@@ -14,5 +14,15 @@
         /// 런처 보기 모드: "Grid" (기본 그리드) 또는 "Group" (타입별 그룹)
         /// </summary>
         public string LauncherViewMode { get; set; } = "Grid";
+        
+        /// <summary>
+        /// 네트워크 상태 감지 활성화
+        /// </summary>
+        public bool EnableNetworkMonitoring { get; set; } = false;
+        
+        /// <summary>
+        /// 네트워크 상태 감지 주기 (초)
+        /// </summary>
+        public int NetworkCheckIntervalSeconds { get; set; } = 5;
     }
 }

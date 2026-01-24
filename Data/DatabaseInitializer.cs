@@ -205,17 +205,16 @@ namespace FACTOVA_Execute.Data
                     command.ExecuteNonQuery();
                 }
 
-                // 기존 TargetAddresses 데이터를 PingAddresses로 마이그레이션
-                if (columns.Contains("TargetAddresses"))
-                {
-                    command.CommandText = @"
-                        UPDATE NetworkSettings 
-                        SET PingAddresses = TargetAddresses 
-                        WHERE PingAddresses = '' AND TargetAddresses != ''";
-                    command.ExecuteNonQuery();
-                }
+                // 기존 TargetAddresses 마이그레이션은 더 이상 수행하지 않음 (사용자가 직접 입력)
 
                 // UseSequentialCheck 컬럼 제거는 나중에 (하위 호환성)
+                
+                // CheckType이 비어있거나 유효하지 않은 경우에만 기본값 설정
+                command.CommandText = @"
+                    UPDATE NetworkSettings 
+                    SET CheckType = 'Ping' 
+                    WHERE CheckType IS NULL OR CheckType = '' OR CheckType NOT IN ('Ping', 'HTTP', 'TCP')";
+                command.ExecuteNonQuery();
                 
                 // RetryDelaySeconds 또는 AutoStartPrograms 컬럼이 없으면 추가
                 if (!columns.Contains("RetryDelaySeconds"))
@@ -265,6 +264,20 @@ namespace FACTOVA_Execute.Data
                 if (!columns.Contains("LauncherViewMode"))
                 {
                     command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN LauncherViewMode TEXT NOT NULL DEFAULT 'Grid'";
+                    command.ExecuteNonQuery();
+                }
+                
+                // EnableNetworkMonitoring 컬럼이 없으면 추가
+                if (!columns.Contains("EnableNetworkMonitoring"))
+                {
+                    command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN EnableNetworkMonitoring INTEGER NOT NULL DEFAULT 0";
+                    command.ExecuteNonQuery();
+                }
+                
+                // NetworkCheckIntervalSeconds 컬럼이 없으면 추가
+                if (!columns.Contains("NetworkCheckIntervalSeconds"))
+                {
+                    command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN NetworkCheckIntervalSeconds INTEGER NOT NULL DEFAULT 5";
                     command.ExecuteNonQuery();
                 }
             }
@@ -363,19 +376,15 @@ namespace FACTOVA_Execute.Data
 
             if (count == 0)
             {
-                // 배치파일과 동일한 게이트웨이 순서
-                var defaultPingAddresses = "165.186.55.129;10.162.190.1;165.186.47.1;10.162.35.1";
-                var defaultHttpAddresses = "http://google.com;http://naver.com";
-                var defaultTcpAddresses = "165.186.55.129;10.162.190.1";
-                
+                // 빈 값으로 초기화 (사용자가 직접 입력)
                 var command = connection.CreateCommand();
                 command.CommandText = @"
                     INSERT INTO NetworkSettings (CheckType, PingAddresses, HttpAddresses, TcpAddresses, Port, TimeoutMs, CheckIntervalSeconds, RetryDelaySeconds, AutoStartPrograms) 
                     VALUES (@checkType, @pingAddresses, @httpAddresses, @tcpAddresses, @port, @timeoutMs, @checkIntervalSeconds, @retryDelaySeconds, @autoStartPrograms)";
                 command.Parameters.AddWithValue("@checkType", "Ping");
-                command.Parameters.AddWithValue("@pingAddresses", defaultPingAddresses);
-                command.Parameters.AddWithValue("@httpAddresses", defaultHttpAddresses);
-                command.Parameters.AddWithValue("@tcpAddresses", defaultTcpAddresses);
+                command.Parameters.AddWithValue("@pingAddresses", "");
+                command.Parameters.AddWithValue("@httpAddresses", "");
+                command.Parameters.AddWithValue("@tcpAddresses", "");
                 command.Parameters.AddWithValue("@port", 80);
                 command.Parameters.AddWithValue("@timeoutMs", 3000);
                 command.Parameters.AddWithValue("@checkIntervalSeconds", 30);
@@ -398,12 +407,14 @@ namespace FACTOVA_Execute.Data
             {
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                    INSERT INTO GeneralSettings (AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode) 
-                    VALUES (@autoStartMonitoring, @startInTray, @launcherItemsPerRow, @launcherViewMode)";
+                    INSERT INTO GeneralSettings (AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode, EnableNetworkMonitoring, NetworkCheckIntervalSeconds) 
+                    VALUES (@autoStartMonitoring, @startInTray, @launcherItemsPerRow, @launcherViewMode, @enableNetworkMonitoring, @networkCheckIntervalSeconds)";
                 command.Parameters.AddWithValue("@autoStartMonitoring", 1);
                 command.Parameters.AddWithValue("@startInTray", 0);
                 command.Parameters.AddWithValue("@launcherItemsPerRow", 5);
                 command.Parameters.AddWithValue("@launcherViewMode", "Grid");
+                command.Parameters.AddWithValue("@enableNetworkMonitoring", 0);
+                command.Parameters.AddWithValue("@networkCheckIntervalSeconds", 5);
                 command.ExecuteNonQuery();
             }
         }

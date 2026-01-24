@@ -19,6 +19,7 @@ namespace FACTOVA_Execute.Views
     {
         private NetworkMonitorService? _networkMonitorService;
         private ProcessMonitorService? _processMonitorService;
+        private NetworkStatusMonitor? _networkStatusMonitor;
         private readonly GeneralSettingsRepository _generalRepository;
         private readonly TriggerSettingsRepository _triggerRepository;
         private readonly ProgramRepository _programRepository;
@@ -68,6 +69,14 @@ namespace FACTOVA_Execute.Views
             try
             {
                 var settings = _generalRepository.GetSettings();
+                
+                // 네트워크 상태 감지 시작 (설정에서 활성화된 경우)
+                if (settings.EnableNetworkMonitoring)
+                {
+                    _networkStatusMonitor = new NetworkStatusMonitor();
+                    _networkStatusMonitor.StartMonitoring();
+                    AddLogMessage("네트워크 상태 감지가 시작되었습니다.", NetworkMonitorService.LogLevel.Info);
+                }
                 
                 if (settings.AutoStartMonitoring)
                 {
@@ -878,6 +887,15 @@ namespace FACTOVA_Execute.Views
                 _networkMonitorService = null;
                 _processMonitorService = null;
 
+                // 네트워크 상태 감지 시작 (설정에서 활성화된 경우)
+                var settings = _generalRepository.GetSettings();
+                if (settings.EnableNetworkMonitoring && _networkStatusMonitor == null)
+                {
+                    _networkStatusMonitor = new NetworkStatusMonitor();
+                    _networkStatusMonitor.StartMonitoring();
+                    AddLogMessage("네트워크 상태 감지가 시작되었습니다.", NetworkMonitorService.LogLevel.Info);
+                }
+
                 // 항상 네트워크 모니터링부터 시작
                 _networkMonitorService = new NetworkMonitorService();
                 _networkMonitorService.LogMessageReceived += OnLogMessageReceived;
@@ -917,6 +935,9 @@ namespace FACTOVA_Execute.Views
                 _processMonitorService?.StopMonitoring();
                 _processMonitorService?.Dispose();
                 _processMonitorService = null;
+
+                // 네트워크 상태 감지는 중지하지 않음 (독립적으로 동작)
+                // 사용자가 원한다면 일반 설정에서 비활성화 가능
 
                 StartMonitorButton.IsEnabled = true;
                 StopMonitorButton.IsEnabled = false;
@@ -1062,6 +1083,8 @@ namespace FACTOVA_Execute.Views
         {
             _networkMonitorService?.Dispose();
             _processMonitorService?.Dispose();
+            // NetworkStatusMonitor는 앱 전체에서 유지해야 하므로 여기서 정리하지 않음
+            // _networkStatusMonitor?.Dispose();
         }
     }
 }

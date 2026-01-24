@@ -39,6 +39,22 @@ namespace FACTOVA_Execute.Views
             {
                 GridViewRadio.IsChecked = true;
             }
+            
+            // 네트워크 상태 감지 설정
+            EnableNetworkMonitoringCheckBox.IsChecked = _currentSettings.EnableNetworkMonitoring;
+            NetworkCheckIntervalTextBox.Text = _currentSettings.NetworkCheckIntervalSeconds.ToString();
+            NetworkCheckIntervalTextBox.IsEnabled = _currentSettings.EnableNetworkMonitoring;
+        }
+
+        /// <summary>
+        /// 네트워크 모니터링 체크박스 변경 이벤트
+        /// </summary>
+        private void EnableNetworkMonitoringCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (NetworkCheckIntervalTextBox != null)
+            {
+                NetworkCheckIntervalTextBox.IsEnabled = EnableNetworkMonitoringCheckBox.IsChecked ?? false;
+            }
         }
 
         /// <summary>
@@ -65,12 +81,25 @@ namespace FACTOVA_Execute.Views
                     return;
                 }
 
+                // 네트워크 상태 감지 설정
+                _currentSettings.EnableNetworkMonitoring = EnableNetworkMonitoringCheckBox.IsChecked ?? false;
+                
+                if (int.TryParse(NetworkCheckIntervalTextBox.Text, out int checkInterval) && checkInterval > 0 && checkInterval <= 60)
+                {
+                    _currentSettings.NetworkCheckIntervalSeconds = checkInterval;
+                }
+                else
+                {
+                    MessageBox.Show("감지 주기는 1~60 사이의 숫자여야 합니다.", "유효성 검사 오류", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 _repository.UpdateSettings(_currentSettings);
 
                 // 런처 새로고침 (행별 개수 및 보기 모드 변경 반영)
                 MainWindow.Instance?.RefreshExecuteTabLauncher();
 
-                MessageBox.Show("일반 설정이 저장되었습니다.", "저장 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("일반 설정이 저장되었습니다.\n\n네트워크 상태 감지 설정은 프로그램을 다시 시작하거나 모니터링을 재시작하면 적용됩니다.", "저장 완료", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
