@@ -1066,7 +1066,7 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private void AddLogMessage(string message, NetworkMonitorService.LogLevel level)
         {
-            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffffff");
+            var timestamp = DateTime.Now.ToString("HH:mm:ss");
             var logLine = $"[{timestamp}] {message}\n";
 
             var document = LogEditor.Document;

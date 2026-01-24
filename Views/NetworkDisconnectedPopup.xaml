@@ -5,7 +5,7 @@ xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 mc:Ignorable="d"
 Title="네트워크 연결 끊김" 
-Height="280" Width="500"
+Height="500" Width="520"
 WindowStartupLocation="CenterScreen"
 ResizeMode="NoResize"
 Topmost="True"
@@ -40,30 +40,80 @@ Icon="/Icons/FACTOVA_Execute.ico">
         <Border Grid.Row="1" 
                 Background="White"
                 Padding="20">
-            <StackPanel VerticalAlignment="Center">
+            <StackPanel VerticalAlignment="Top">
                 <TextBlock Text="네트워크 연결이 끊어졌습니다. 확인하세요." 
                            FontSize="16"
                            TextWrapping="Wrap"
                            Foreground="#212529"
-                           Margin="0,0,0,20"/>
+                           Margin="0,0,0,15"/>
                 
+                <!-- 끊김 시작 시간 -->
                 <Border BorderBrush="#DEE2E6"
                         BorderThickness="1"
                         Background="#F8F9FA"
+                        Padding="12"
+                        CornerRadius="4"
+                        Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="끊김 시작:" 
+                                   FontSize="13"
+                                   Foreground="#6C757D"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock x:Name="StartTimeTextBlock" 
+                                   Grid.Column="1"
+                                   Text="2024-01-01 00:00:00"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   FontFamily="Consolas"
+                                   Foreground="#495057"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+                
+                <!-- 경과 시간 -->
+                <Border BorderBrush="#E53935"
+                        BorderThickness="2"
+                        Background="#FFEBEE"
                         Padding="15"
-                        CornerRadius="4">
+                        CornerRadius="4"
+                        Margin="0,0,0,10">
                     <StackPanel>
-                        <TextBlock Text="끊어진 시간:" 
+                        <TextBlock Text="경과 시간:" 
                                    FontSize="13"
                                    Foreground="#6C757D"
                                    Margin="0,0,0,5"/>
                         <TextBlock x:Name="DisconnectedTimeTextBlock" 
-                                   Text="00:00:00.000"
-                                   FontSize="24"
+                                   Text="00:00:00"
+                                   FontSize="28"
                                    FontWeight="Bold"
                                    FontFamily="Consolas"
                                    Foreground="#E53935"
                                    HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 점검 중인 네트워크 -->
+                <Border BorderBrush="#DEE2E6"
+                        BorderThickness="1"
+                        Background="#F8F9FA"
+                        Padding="12"
+                        CornerRadius="4">
+                    <StackPanel>
+                        <TextBlock Text="점검 중인 네트워크:" 
+                                   FontSize="13"
+                                   Foreground="#6C757D"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock x:Name="CheckingAddressTextBlock" 
+                                   Text="확인 중..."
+                                   FontSize="12"
+                                   FontFamily="Consolas"
+                                   Foreground="#495057"
+                                   TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
             </StackPanel>

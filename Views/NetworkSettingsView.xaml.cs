@@ -38,6 +38,7 @@ namespace FACTOVA_Execute.Views
     {
         private readonly NetworkSettingsRepository _repository;
         private NetworkSettings _currentSettings;
+        private bool _isLoading = false; // 로딩 중 플래그
 
         public NetworkSettingsView()
         {
@@ -51,6 +52,7 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private void LoadSettings()
         {
+            _isLoading = true; // 로딩 시작
             _currentSettings = _repository.GetSettings();
 
             // 디버그: 로드된 값 확인
@@ -89,6 +91,8 @@ namespace FACTOVA_Execute.Views
             TimeoutTextBox.Text = _currentSettings.TimeoutMs.ToString();
             RetryDelayTextBox.Text = _currentSettings.RetryDelaySeconds.ToString();
             CheckIntervalTextBox.Text = _currentSettings.CheckIntervalSeconds.ToString();
+            
+            _isLoading = false; // 로딩 완료
         }
 
         /// <summary>
@@ -99,8 +103,11 @@ namespace FACTOVA_Execute.Views
             if (_currentSettings == null || TargetAddressesTextBox == null)
                 return;
 
-            // 현재 입력된 주소를 이전 체크 타입에 저장
-            SaveCurrentAddresses();
+            // 로딩 중이 아닐 때만 현재 입력된 주소를 이전 체크 타입에 저장
+            if (!_isLoading)
+            {
+                SaveCurrentAddresses();
+            }
 
             // 새로운 체크 타입으로 변경
             _currentSettings.CheckType = ((ComboBoxItem)CheckTypeComboBox.SelectedItem).Content.ToString()!;
