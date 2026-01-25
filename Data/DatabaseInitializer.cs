@@ -280,6 +280,13 @@ namespace FACTOVA_Execute.Data
                     command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN NetworkCheckIntervalSeconds INTEGER NOT NULL DEFAULT 5";
                     command.ExecuteNonQuery();
                 }
+                
+                // Language 컬럼이 없으면 추가
+                if (!columns.Contains("Language"))
+                {
+                    command.CommandText = "ALTER TABLE GeneralSettings ADD COLUMN Language TEXT NOT NULL DEFAULT 'ko-KR'";
+                    command.ExecuteNonQuery();
+                }
             }
             catch (Exception ex)
             {

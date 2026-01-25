@@ -7,16 +7,16 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <TabControl>
-        <TabItem Header="일반">
+        <TabItem Header="{DynamicResource Tab_General}">
             <local:GeneralSettingsView />
         </TabItem>
-        <TabItem Header="프로그램 설정">
+        <TabItem Header="{DynamicResource Tab_ProgramSettings}">
             <local:ProgramSettingsView />
         </TabItem>
-        <TabItem Header="네트워크">
+        <TabItem Header="{DynamicResource Tab_Network}">
             <local:NetworkSettingsView />
         </TabItem>
-        <TabItem Header="프로그램 감지">
+        <TabItem Header="{DynamicResource Tab_ProgramMonitor}">
             <local:TriggerSettingsView />
         </TabItem>
     </TabControl>

@@ -192,7 +192,7 @@
 
         <!-- 제목 -->
         <TextBlock Grid.Row="0" 
-                   Text="프로그램 실행 모니터" 
+                   Text="{DynamicResource Execute_Title}" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#212529"
@@ -204,7 +204,7 @@
                     BorderThickness="1"
                     Background="White">
             <!-- 런처 탭 -->
-            <TabItem Header="런처" FontSize="14" FontWeight="SemiBold">
+            <TabItem Header="{DynamicResource Execute_Launcher}" FontSize="14" FontWeight="SemiBold">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -222,7 +222,7 @@
             </TabItem>
 
             <!-- 로그 탭 -->
-            <TabItem Header="로그" FontSize="14" FontWeight="SemiBold">
+            <TabItem Header="{DynamicResource Execute_Log}" FontSize="14" FontWeight="SemiBold">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -235,18 +235,18 @@
                                 Orientation="Horizontal" 
                                 Margin="0,0,0,15">
                         <Button x:Name="StartMonitorButton" 
-                                Content="▶ 모니터링 시작" 
+                                Content="{DynamicResource Execute_StartMonitoring}" 
                                 Style="{StaticResource StartButtonStyle}"
                                 Click="StartMonitorButton_Click"
                                 Margin="0,0,10,0"/>
                         <Button x:Name="StopMonitorButton" 
-                                Content="■ 모니터링 중지" 
+                                Content="{DynamicResource Execute_StopMonitoring}" 
                                 Style="{StaticResource StopButtonStyle}"
                                 Click="StopMonitorButton_Click"
                                 IsEnabled="False"
                                 Margin="0,0,10,0"/>
                         <Button x:Name="ManualStartButton" 
-                                Content="🚀 수동 실행" 
+                                Content="{DynamicResource Execute_ManualRun}" 
                                 Style="{StaticResource ManualButtonStyle}"
                                 Click="ManualStartButton_Click"
                                 Margin="0,0,10,0"/>
@@ -277,7 +277,7 @@
                                 HorizontalAlignment="Right"
                                 Margin="0,10,0,0">
                         <Button x:Name="ClearLogButton" 
-                                Content="로그 지우기" 
+                                Content="{DynamicResource Execute_ClearLog}" 
                                 Style="{StaticResource ClearButtonStyle}"
                                 Click="ClearLogButton_Click"/>
                     </StackPanel>

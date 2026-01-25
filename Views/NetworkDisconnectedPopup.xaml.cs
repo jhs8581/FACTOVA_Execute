@@ -63,12 +63,12 @@ namespace FACTOVA_Execute.Views
                 }
                 else
                 {
-                    CheckingAddressTextBlock.Text = "등록된 주소 없음";
+                    CheckingAddressTextBlock.Text = Services.LocalizationService.Instance.GetString("NetworkPopup_NoAddress");
                 }
             }
             catch
             {
-                CheckingAddressTextBlock.Text = "주소 확인 실패";
+                CheckingAddressTextBlock.Text = Services.LocalizationService.Instance.GetString("NetworkPopup_AddressFailed");
             }
         }
 

@@ -44,7 +44,7 @@
 
         <!-- 제목 -->
         <TextBlock Grid.Row="0" 
-                   Text="일반 설정" 
+                   Text="{DynamicResource GeneralSettings_Title}" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#212529"
@@ -58,13 +58,45 @@
                     CornerRadius="4"
                     Padding="20">
                 <StackPanel>
+                <!-- 언어 설정 -->
+                <Border BorderBrush="#DEE2E6" 
+                        BorderThickness="0,0,0,1"
+                        Padding="0,0,0,20"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource GeneralSettings_Language}" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Foreground="#212529"
+                                   Margin="0,0,0,10"/>
+                        
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <RadioButton x:Name="KoreanRadio"
+                                        Content="{DynamicResource GeneralSettings_LanguageKorean}"
+                                        GroupName="Language"
+                                        FontSize="14"
+                                        Margin="0,0,20,0"
+                                        Checked="LanguageRadio_Checked"/>
+                            <RadioButton x:Name="EnglishRadio"
+                                        Content="{DynamicResource GeneralSettings_LanguageEnglish}"
+                                        GroupName="Language"
+                                        FontSize="14"
+                                        Checked="LanguageRadio_Checked"/>
+                        </StackPanel>
+                        
+                        <TextBlock Text="{DynamicResource GeneralSettings_LanguageHint}" 
+                                   FontSize="12" 
+                                   Foreground="#6C757D"/>
+                    </StackPanel>
+                </Border>
+                
                 <!-- 연결 시 자동 실행 -->
                 <Border BorderBrush="#DEE2E6" 
                         BorderThickness="0,0,0,1"
                         Padding="0,0,0,20"
                         Margin="0,0,0,20">
                     <StackPanel>
-                        <TextBlock Text="연결 시 자동 실행" 
+                        <TextBlock Text="{DynamicResource GeneralSettings_AutoRun}" 
                                    FontSize="16" 
                                    FontWeight="Bold"
                                    Foreground="#212529"
@@ -74,12 +106,13 @@
                                   FontSize="14"
                                   VerticalContentAlignment="Center">
                             <CheckBox.Content>
-                                <TextBlock TextWrapping="Wrap">
-                                    <Run Text="네트워크 연결 시 자동으로 프로그램 실행" FontWeight="SemiBold"/><LineBreak/>
-                                    <Run Text="프로그램 시작 시 자동으로 네트워크 모니터링을 시작하고, 네트워크가 연결되면 자동으로 등록된 프로그램을 실행합니다." 
-                                         FontSize="12" 
-                                         Foreground="#6C757D"/>
-                                </TextBlock>
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource GeneralSettings_AutoRunTitle}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{DynamicResource GeneralSettings_AutoRunDesc}" 
+                                               FontSize="12" 
+                                               Foreground="#6C757D"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
                             </CheckBox.Content>
                         </CheckBox>
                     </StackPanel>
@@ -91,7 +124,7 @@
                         Padding="0,0,0,20"
                         Margin="0,0,0,20">
                     <StackPanel>
-                        <TextBlock Text="프로그램 실행 모드" 
+                        <TextBlock Text="{DynamicResource GeneralSettings_RunMode}" 
                                    FontSize="16" 
                                    FontWeight="Bold"
                                    Foreground="#212529"
@@ -101,12 +134,13 @@
                                   FontSize="14"
                                   VerticalContentAlignment="Center">
                             <CheckBox.Content>
-                                <TextBlock TextWrapping="Wrap">
-                                    <Run Text="트레이로 실행" FontWeight="SemiBold"/><LineBreak/>
-                                    <Run Text="프로그램 시작 시 창을 표시하지 않고 시스템 트레이에서 실행합니다. 트레이 아이콘을 더블클릭하면 창이 표시됩니다." 
-                                         FontSize="12" 
-                                         Foreground="#6C757D"/>
-                                </TextBlock>
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource GeneralSettings_TrayRun}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{DynamicResource GeneralSettings_TrayRunDesc}" 
+                                               FontSize="12" 
+                                               Foreground="#6C757D"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
                             </CheckBox.Content>
                         </CheckBox>
 
@@ -117,14 +151,14 @@
                                 CornerRadius="3"
                                 Margin="0,15,0,0">
                             <StackPanel>
-                                <TextBlock Text="⚠️ 주의사항" 
+                                <TextBlock Text="{DynamicResource Warning}" 
                                            FontWeight="Bold"
                                            Foreground="#856404"
                                            Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" 
                                            Foreground="#856404"
                                            FontSize="12"
-                                           Text="'트레이로 실행' 옵션은 프로그램을 다시 시작한 후에 적용됩니다."/>
+                                           Text="{DynamicResource GeneralSettings_RestartRequired}"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -136,7 +170,7 @@
                         Padding="0,0,0,20"
                         Margin="0,0,0,20">
                     <StackPanel>
-                        <TextBlock Text="런처 설정" 
+                        <TextBlock Text="{DynamicResource GeneralSettings_Launcher}" 
                                    FontSize="16" 
                                    FontWeight="Bold"
                                    Foreground="#212529"
@@ -144,29 +178,29 @@
                         
                         <!-- 보기 모드 -->
                         <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="보기 모드:" 
+                            <TextBlock Text="{DynamicResource GeneralSettings_ViewMode}" 
                                        FontSize="14"
                                        FontWeight="SemiBold"
                                        Margin="0,0,0,8"/>
                             <RadioButton x:Name="GridViewRadio"
-                                        Content="기본 보기 (그리드)"
+                                        Content="{DynamicResource GeneralSettings_ViewModeGrid}"
                                         GroupName="LauncherView"
                                         FontSize="13"
                                         Margin="0,0,0,5"/>
                             <RadioButton x:Name="GroupViewRadio"
-                                        Content="그룹별 보기 (타입별로 묶기)"
+                                        Content="{DynamicResource GeneralSettings_ViewModeGroup}"
                                         GroupName="LauncherView"
                                         FontSize="13"/>
                             <TextBlock TextWrapping="Wrap" 
                                        FontSize="11" 
                                        Foreground="#6C757D"
                                        Margin="0,8,0,0"
-                                       Text="• 기본 보기: 모든 프로그램을 그리드 형태로 표시&#x0a;• 그룹별 보기: 실행 모드별로 그룹화하여 표시 (접기/펼치기 가능)"/>
+                                       Text="{DynamicResource GeneralSettings_ViewModeDesc}"/>
                         </StackPanel>
                         
                         <!-- 행별 개수 -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <TextBlock Text="행별 개수:" 
+                            <TextBlock Text="{DynamicResource GeneralSettings_ItemsPerRow}" 
                                        FontSize="14"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"
@@ -182,14 +216,14 @@
                         <TextBlock TextWrapping="Wrap" 
                                    FontSize="12" 
                                    Foreground="#6C757D"
-                                   Text="프로그램 실행 모니터의 런처 탭에서 한 줄에 표시할 프로그램 버튼의 개수를 설정합니다. (권장: 3~8)"/>
+                                   Text="{DynamicResource GeneralSettings_ItemsPerRowDesc}"/>
                     </StackPanel>
                 </Border>
 
                 <!-- 네트워크 상태 감지 설정 -->
                 <Border Padding="0,0,0,20">
                     <StackPanel>
-                        <TextBlock Text="네트워크 상태 감지" 
+                        <TextBlock Text="{DynamicResource GeneralSettings_NetworkMonitor}" 
                                    FontSize="16" 
                                    FontWeight="Bold"
                                    Foreground="#212529"
@@ -202,17 +236,18 @@
                                   Unchecked="EnableNetworkMonitoringCheckBox_Changed"
                                   Margin="0,0,0,15">
                             <CheckBox.Content>
-                                <TextBlock TextWrapping="Wrap">
-                                    <Run Text="네트워크 상태 감지 활성화" FontWeight="SemiBold"/><LineBreak/>
-                                    <Run Text="네트워크 연결이 끊어지면 팝업으로 알려주고, 복구되면 자동으로 팝업을 닫습니다." 
-                                         FontSize="12" 
-                                         Foreground="#6C757D"/>
-                                </TextBlock>
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource GeneralSettings_EnableNetworkMonitor}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{DynamicResource GeneralSettings_EnableNetworkMonitorDesc}" 
+                                               FontSize="12" 
+                                               Foreground="#6C757D"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
                             </CheckBox.Content>
                         </CheckBox>
 
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <TextBlock Text="감지 주기 (초):" 
+                            <TextBlock Text="{DynamicResource GeneralSettings_CheckInterval}" 
                                        FontSize="14"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"
@@ -229,7 +264,7 @@
                                    FontSize="12" 
                                    Foreground="#6C757D"
                                    Margin="0,5,0,0"
-                                   Text="네트워크 상태를 확인할 주기를 설정합니다. (권장: 3~10초)"/>
+                                   Text="{DynamicResource GeneralSettings_CheckIntervalDesc}"/>
 
                         <Border Background="#FFF3CD" 
                                 BorderBrush="#FFE69C"
@@ -238,14 +273,14 @@
                                 CornerRadius="3"
                                 Margin="0,15,0,0">
                             <StackPanel>
-                                <TextBlock Text="💡 네트워크 상태 감지 정보" 
+                                <TextBlock Text="{DynamicResource GeneralSettings_NetworkMonitorInfo}" 
                                            FontWeight="Bold"
                                            Foreground="#856404"
                                            Margin="0,0,0,5"/>
                                 <TextBlock TextWrapping="Wrap" 
                                            Foreground="#856404"
                                            FontSize="12"
-                                           Text="• 연결이 끊어지면 팝업창에 끊어진 시간이 표시됩니다.&#x0a;• 네트워크가 복구되면 자동으로 팝업이 닫힙니다.&#x0a;• 연결/끊김 이벤트는 별도 로그 파일에 기록됩니다."/>
+                                           Text="{DynamicResource GeneralSettings_NetworkMonitorInfoText}"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -260,7 +295,7 @@
                     HorizontalAlignment="Right"
                     Margin="0,10,0,0">
             <Button x:Name="SaveButton" 
-                    Content="저장" 
+                    Content="{DynamicResource Save}" 
                     Style="{StaticResource SaveButtonStyle}"
                     Click="SaveButton_Click"/>
         </StackPanel>

@@ -143,7 +143,7 @@
 
         <!-- 제목 -->
         <TextBlock Grid.Row="0" 
-                   Text="프로그램 설정" 
+                   Text="{DynamicResource ProgramSettings_Title}" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#212529"
@@ -160,12 +160,12 @@
             <!-- 왼쪽: 추가/삭제/저장 버튼 -->
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Button x:Name="AddButton" 
-                        Content="+ 프로그램 추가" 
+                        Content="{DynamicResource ProgramSettings_AddProgram}" 
                         Style="{StaticResource AddButtonStyle}"
                         Margin="0,0,5,0"
                         Click="AddButton_Click"/>
                 <Button x:Name="AddFolderButton" 
-                        Content="📁 폴더 추가" 
+                        Content="{DynamicResource ProgramSettings_AddFolder}" 
                         Style="{StaticResource AddButtonStyle}"
                         Background="#FD7E14"
                         Margin="0,0,5,0"
@@ -186,19 +186,19 @@
                     </Button.Template>
                 </Button>
                 <Button x:Name="DeleteButton" 
-                        Content="삭제" 
+                        Content="{DynamicResource Delete}" 
                         Style="{StaticResource DeleteButtonStyle}"
                         Margin="0,0,5,0"
                         Click="DeleteButton_Click"/>
                 <Button x:Name="SaveButton" 
-                        Content="저장" 
+                        Content="{DynamicResource Save}" 
                         Style="{StaticResource SaveButtonStyle}"
                         Click="SaveButton_Click"/>
             </StackPanel>
 
             <!-- 오른쪽: 필터 콤보박스 -->
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <TextBlock Text="필터:" 
+                <TextBlock Text="{DynamicResource ProgramSettings_Filter}" 
                            FontSize="13"
                            FontWeight="SemiBold"
                            VerticalAlignment="Center"
@@ -208,10 +208,10 @@
                           Height="32"
                           FontSize="13"
                           SelectionChanged="FilterComboBox_SelectionChanged">
-                    <ComboBoxItem Content="전체" Tag="All" IsSelected="True"/>
-                    <ComboBoxItem Content="네트워크 연결 실행" Tag="Network"/>
-                    <ComboBoxItem Content="프로그램 감지 실행" Tag="Trigger"/>
-                    <ComboBoxItem Content="런처 전용" Tag="Launcher"/>
+                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterAll}" Tag="All" IsSelected="True"/>
+                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterNetwork}" Tag="Network"/>
+                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterTrigger}" Tag="Trigger"/>
+                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterLauncher}" Tag="Launcher"/>
                 </ComboBox>
             </StackPanel>
         </Grid>
@@ -263,9 +263,9 @@
                             <DataTemplate>
                                 <ComboBox SelectedValue="{Binding ExecutionMode, UpdateSourceTrigger=PropertyChanged}"
                                           SelectedValuePath="Tag">
-                                    <ComboBoxItem Content="네트워크 연결 실행" Tag="Network"/>
-                                    <ComboBoxItem Content="프로그램 감지 실행" Tag="Trigger"/>
-                                    <ComboBoxItem Content="런처 전용" Tag="Launcher"/>
+                                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterNetwork}" Tag="Network"/>
+                                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterTrigger}" Tag="Trigger"/>
+                                    <ComboBoxItem Content="{DynamicResource ProgramSettings_FilterLauncher}" Tag="Launcher"/>
                                 </ComboBox>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -330,7 +330,7 @@
                     <DataGridTemplateColumn Header="경로변경" Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="찾아보기" 
+                                <Button Content="{DynamicResource ProgramSettings_Browse}" 
                                         Click="BrowseButton_Click"
                                         Style="{StaticResource BrowseButtonStyle}"
                                         HorizontalAlignment="Center"
@@ -341,17 +341,17 @@
 
                     <!-- 아이콘변경 버튼 -->
                     <DataGridTemplateColumn Header="아이콘" Width="100">
-    <DataGridTemplateColumn.CellTemplate>
-        <DataTemplate>
-            <Button Content="🖼 변경" 
-                    Click="IconButton_Click"
-                    Style="{StaticResource BrowseButtonStyle}"
-                    HorizontalAlignment="Center"
-                    Margin="5"
-                    ToolTip="{Binding IconPath}"/>
-        </DataTemplate>
-    </DataGridTemplateColumn.CellTemplate>
-</DataGridTemplateColumn>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="{DynamicResource ProgramSettings_ChangeIcon}" 
+                                        Click="IconButton_Click"
+                                        Style="{StaticResource BrowseButtonStyle}"
+                                        HorizontalAlignment="Center"
+                                        Margin="5"
+                                        ToolTip="{Binding IconPath}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

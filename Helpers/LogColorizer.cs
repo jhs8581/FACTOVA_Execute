@@ -17,8 +17,14 @@ namespace FACTOVA_Execute.Helpers
 
             var lineText = CurrentContext.Document.GetText(line);
 
-            // 성공 메시지 (녹색)
-            if (lineText.Contains("성공") || lineText.Contains("완료") || lineText.Contains("✓"))
+            // 성공 메시지 (녹색) - 한글/영문 모두 지원
+            if (lineText.Contains("성공") || lineText.Contains("완료") || lineText.Contains("✓") ||
+                lineText.Contains("success", StringComparison.OrdinalIgnoreCase) || 
+                lineText.Contains("complete", StringComparison.OrdinalIgnoreCase) ||
+                lineText.Contains("connected", StringComparison.OrdinalIgnoreCase) ||
+                lineText.Contains("started", StringComparison.OrdinalIgnoreCase) ||
+                lineText.Contains("executed", StringComparison.OrdinalIgnoreCase) ||
+                lineText.Contains("detected", StringComparison.OrdinalIgnoreCase))
             {
                 ChangeLinePart(line.Offset, line.EndOffset, element =>
                 {
@@ -33,9 +39,16 @@ namespace FACTOVA_Execute.Helpers
                     }
                 });
             }
-            // 경고 메시지 (노란색)
+            // 경고 메시지 (노란색) - 한글/영문 모두 지원
             else if (lineText.Contains("경고") || lineText.Contains("실패") || lineText.Contains("✗") || 
-                     lineText.Contains("재시도") || lineText.Contains("중지") || lineText.Contains("끊김"))
+                     lineText.Contains("재시도") || lineText.Contains("중지") || lineText.Contains("끊김") ||
+                     lineText.Contains("warning", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("failed", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("retry", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("stop", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("disconnect", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("terminated", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("already running", StringComparison.OrdinalIgnoreCase))
             {
                 ChangeLinePart(line.Offset, line.EndOffset, element =>
                 {
@@ -46,9 +59,11 @@ namespace FACTOVA_Execute.Helpers
                     }
                 });
             }
-            // 오류 메시지 (빨간색)
-            else if (lineText.Contains("오류") || lineText.Contains("에러") || lineText.Contains("Error") ||
-                     lineText.Contains("없습니다") && lineText.Contains("파일"))
+            // 오류 메시지 (빨간색) - 한글/영문 모두 지원
+            else if (lineText.Contains("오류") || lineText.Contains("에러") || 
+                     lineText.Contains("error", StringComparison.OrdinalIgnoreCase) ||
+                     lineText.Contains("not found", StringComparison.OrdinalIgnoreCase) ||
+                     (lineText.Contains("없습니다") && lineText.Contains("파일")))
             {
                 ChangeLinePart(line.Offset, line.EndOffset, element =>
                 {

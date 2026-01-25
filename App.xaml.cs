@@ -2,6 +2,7 @@
 using System.Data;
 using System.Windows;
 using FACTOVA_Execute.Data;
+using FACTOVA_Execute.Services;
 
 namespace FACTOVA_Execute
 {
@@ -18,6 +19,11 @@ namespace FACTOVA_Execute
             {
                 // 데이터베이스 초기화 (MainWindow 생성 전에 실행)
                 DatabaseInitializer.Initialize();
+                
+                // 저장된 언어 설정 로드
+                var generalRepository = new GeneralSettingsRepository();
+                var settings = generalRepository.GetSettings();
+                LocalizationService.Instance.SetLanguage(settings.Language);
             }
             catch (Exception ex)
             {

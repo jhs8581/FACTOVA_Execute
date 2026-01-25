@@ -6,14 +6,14 @@
         xmlns:local="clr-namespace:FACTOVA_Execute"
         xmlns:views="clr-namespace:FACTOVA_Execute.Views"
         mc:Ignorable="d"
-        Title="FACTOVA Execute" Height="800" Width="800"
+        Title="{DynamicResource AppTitle}" Height="800" Width="800"
         Icon="Icons/FACTOVA_Execute.ico">
     <Grid>
         <TabControl>
-            <TabItem Header="Execute">
+            <TabItem Header="{DynamicResource Tab_Execute}">
                 <views:ExecuteTabView />
             </TabItem>
-            <TabItem Header="Settings">
+            <TabItem Header="{DynamicResource Tab_Settings}">
                 <views:SettingsTabView />
             </TabItem>
         </TabControl>

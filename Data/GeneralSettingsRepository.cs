@@ -17,7 +17,7 @@ namespace FACTOVA_Execute.Data
             connection.Open();
 
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode, EnableNetworkMonitoring, NetworkCheckIntervalSeconds FROM GeneralSettings LIMIT 1";
+            command.CommandText = "SELECT Id, AutoStartMonitoring, StartInTray, LauncherItemsPerRow, LauncherViewMode, EnableNetworkMonitoring, NetworkCheckIntervalSeconds, Language FROM GeneralSettings LIMIT 1";
 
             using var reader = command.ExecuteReader();
             if (reader.Read())
@@ -30,7 +30,8 @@ namespace FACTOVA_Execute.Data
                     LauncherItemsPerRow = reader.GetInt32(3),
                     LauncherViewMode = reader.IsDBNull(4) ? "Grid" : reader.GetString(4),
                     EnableNetworkMonitoring = !reader.IsDBNull(5) && reader.GetInt32(5) == 1,
-                    NetworkCheckIntervalSeconds = reader.IsDBNull(6) ? 5 : reader.GetInt32(6)
+                    NetworkCheckIntervalSeconds = reader.IsDBNull(6) ? 5 : reader.GetInt32(6),
+                    Language = reader.IsDBNull(7) ? "ko-KR" : reader.GetString(7)
                 };
             }
 
@@ -42,7 +43,8 @@ namespace FACTOVA_Execute.Data
                 LauncherItemsPerRow = 5,
                 LauncherViewMode = "Grid",
                 EnableNetworkMonitoring = false,
-                NetworkCheckIntervalSeconds = 5
+                NetworkCheckIntervalSeconds = 5,
+                Language = "ko-KR"
             };
         }
 
@@ -62,7 +64,8 @@ namespace FACTOVA_Execute.Data
                     LauncherItemsPerRow = @launcherItemsPerRow,
                     LauncherViewMode = @launcherViewMode,
                     EnableNetworkMonitoring = @enableNetworkMonitoring,
-                    NetworkCheckIntervalSeconds = @networkCheckIntervalSeconds
+                    NetworkCheckIntervalSeconds = @networkCheckIntervalSeconds,
+                    Language = @language
                 WHERE Id = @id";
             command.Parameters.AddWithValue("@id", settings.Id);
             command.Parameters.AddWithValue("@autoStartMonitoring", settings.AutoStartMonitoring ? 1 : 0);
@@ -71,6 +74,7 @@ namespace FACTOVA_Execute.Data
             command.Parameters.AddWithValue("@launcherViewMode", settings.LauncherViewMode);
             command.Parameters.AddWithValue("@enableNetworkMonitoring", settings.EnableNetworkMonitoring ? 1 : 0);
             command.Parameters.AddWithValue("@networkCheckIntervalSeconds", settings.NetworkCheckIntervalSeconds);
+            command.Parameters.AddWithValue("@language", settings.Language);
 
             command.ExecuteNonQuery();
         }

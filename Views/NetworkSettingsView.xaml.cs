@@ -140,54 +140,32 @@ namespace FACTOVA_Execute.Views
         }
 
         /// <summary>
-        /// 체크 타입에 따라 UI 업데이트 (레이블, 힌트, 예시)
+        /// 체크 타입에 따라 UI 업데이트 (레이블, 힌트)
         /// </summary>
         private void UpdateUIForCheckType()
         {
-            if (AddressLabelTextBlock == null || AddressHintTextBlock == null || ExampleTextBlock == null)
+            if (AddressLabelTextBlock == null || AddressHintTextBlock == null)
                 return;
+                
+            var L = Services.LocalizationService.Instance;
 
             switch (_currentSettings.CheckType)
             {
                 case "Ping":
-                    AddressLabelTextBlock.Text = "Ping 주소 (우선순위):";
-                    AddressHintTextBlock.Text = "* 한 줄에 하나씩 IP 주소 입력 (우선순위 순서대로)";
-                    ExampleTextBlock.Text = "• 여러 게이트웨이를 등록하면 순서대로 확인합니다.\n" +
-                                           "• 하나라도 연결되면 네트워크 연결 성공으로 판단합니다.\n" +
-                                           "• 모두 실패하면 지정한 시간(재시도 대기시간) 후 다시 시도합니다.\n\n" +
-                                           "예시 Ping 주소:\n" +
-                                           "165.186.55.129\n" +
-                                           "10.162.190.1\n" +
-                                           "165.186.47.1\n" +
-                                           "8.8.8.8";
+                    AddressLabelTextBlock.Text = L["NetworkSettings_PingAddress"];
+                    AddressHintTextBlock.Text = L["NetworkSettings_PingHint"];
                     PortTextBox.IsEnabled = false;
                     break;
 
                 case "HTTP":
-                    AddressLabelTextBlock.Text = "HTTP URL (우선순위):";
-                    AddressHintTextBlock.Text = "* 한 줄에 하나씩 URL 입력 (http:// 또는 https:// 포함)";
-                    ExampleTextBlock.Text = "• 여러 URL을 등록하면 순서대로 확인합니다.\n" +
-                                           "• 하나라도 연결되면 네트워크 연결 성공으로 판단합니다.\n" +
-                                           "• HTTP 200 응답을 받으면 성공으로 판단합니다.\n\n" +
-                                           "예시 HTTP URL:\n" +
-                                           "http://165.186.55.129\n" +
-                                           "http://google.com\n" +
-                                           "https://www.naver.com\n" +
-                                           "http://example.com";
+                    AddressLabelTextBlock.Text = L["NetworkSettings_HttpAddress"];
+                    AddressHintTextBlock.Text = L["NetworkSettings_HttpHint"];
                     PortTextBox.IsEnabled = false;
                     break;
 
                 case "TCP":
-                    AddressLabelTextBlock.Text = "TCP 주소 (우선순위):";
-                    AddressHintTextBlock.Text = "* 한 줄에 하나씩 IP 주소 입력 + 아래 포트 설정";
-                    ExampleTextBlock.Text = "• 여러 주소를 등록하면 순서대로 확인합니다.\n" +
-                                           "• 지정한 포트로 TCP 연결을 시도합니다.\n" +
-                                           "• 연결이 성공하면 네트워크 연결 성공으로 판단합니다.\n\n" +
-                                           "예시 TCP 주소 (포트 80):\n" +
-                                           "165.186.55.129\n" +
-                                           "10.162.190.1\n" +
-                                           "192.168.0.1\n" +
-                                           "* 포트는 아래 '포트 (TCP용)' 필드에서 설정";
+                    AddressLabelTextBlock.Text = L["NetworkSettings_TcpAddress"];
+                    AddressHintTextBlock.Text = L["NetworkSettings_TcpHint"];
                     PortTextBox.IsEnabled = true;
                     break;
             }
@@ -198,6 +176,7 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            var L = Services.LocalizationService.Instance;
             try
             {
                 // 현재 입력된 주소 저장
@@ -218,11 +197,11 @@ namespace FACTOVA_Execute.Views
 
                 _repository.UpdateSettings(_currentSettings);
 
-                MessageBox.Show("네트워크 설정이 저장되었습니다.", "저장 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(L["NetworkSettings_SaveSuccess"], L["GeneralSettings_SaveComplete"], MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"저장 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{L["GeneralSettings_SaveError"]} {ex.Message}", L["Error"], MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -231,8 +210,9 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private async void TestButton_Click(object sender, RoutedEventArgs e)
         {
+            var L = Services.LocalizationService.Instance;
             TestButton.IsEnabled = false;
-            StatusTextBlock.Text = "테스트 중...";
+            StatusTextBlock.Text = L["NetworkSettings_Testing"];
             StatusTextBlock.Foreground = System.Windows.Media.Brushes.Orange;
             DetailStatusTextBlock.Text = "";
 
@@ -251,7 +231,7 @@ namespace FACTOVA_Execute.Views
 
                 if (!addresses.Any())
                 {
-                    MessageBox.Show($"{AddressLabelTextBlock.Text}을(를) 입력해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(L["NetworkSettings_NoAddressWarning"], L["Warning"], MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -260,7 +240,7 @@ namespace FACTOVA_Execute.Views
 
                 foreach (var address in addresses)
                 {
-                    results.AppendLine($"테스트 중: {address}");
+                    results.AppendLine($"{L["NetworkSettings_TestingAddress"]}: {address}");
                     bool isConnected = false;
 
                     switch (checkType)
@@ -276,7 +256,7 @@ namespace FACTOVA_Execute.Views
                             break;
                     }
 
-                    results.AppendLine($"  → {(isConnected ? $"✓ 성공 ({checkType})" : "✗ 실패")}");
+                    results.AppendLine($"  → {(isConnected ? $"✓ {L["Log_Success"]} ({checkType})" : $"✗ {L["Log_Failed"]}")}");
                     
                     if (isConnected)
                     {
@@ -287,24 +267,24 @@ namespace FACTOVA_Execute.Views
 
                 if (anySuccess)
                 {
-                    StatusTextBlock.Text = "연결 성공";
+                    StatusTextBlock.Text = L["NetworkSettings_Connected"];
                     StatusTextBlock.Foreground = System.Windows.Media.Brushes.Green;
                     DetailStatusTextBlock.Text = results.ToString();
-                    MessageBox.Show("네트워크 연결 테스트 성공!\n\n" + results.ToString(), "성공", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"{L["NetworkSettings_TestSuccess"]}\n\n" + results.ToString(), L["Log_Success"], MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    StatusTextBlock.Text = "모든 주소 연결 실패";
+                    StatusTextBlock.Text = L["NetworkSettings_AllFailed"];
                     StatusTextBlock.Foreground = System.Windows.Media.Brushes.Red;
                     DetailStatusTextBlock.Text = results.ToString();
-                    MessageBox.Show("네트워크 연결 테스트 실패\n\n" + results.ToString(), "실패", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"{L["NetworkSettings_TestFailed"]}\n\n" + results.ToString(), L["Log_Failed"], MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
-                StatusTextBlock.Text = "오류 발생";
+                StatusTextBlock.Text = L["Error"];
                 StatusTextBlock.Foreground = System.Windows.Media.Brushes.Red;
-                MessageBox.Show($"테스트 중 오류 발생: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{L["NetworkSettings_TestError"]}: {ex.Message}", L["Error"], MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

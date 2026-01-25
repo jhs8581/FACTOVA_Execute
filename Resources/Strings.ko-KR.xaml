@@ -1,0 +1,245 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- 공통 -->
+    <system:String x:Key="AppTitle">FACTOVA Execute</system:String>
+    <system:String x:Key="Save">저장</system:String>
+    <system:String x:Key="Cancel">취소</system:String>
+    <system:String x:Key="Close">닫기</system:String>
+    <system:String x:Key="Add">추가</system:String>
+    <system:String x:Key="Delete">삭제</system:String>
+    <system:String x:Key="Edit">편집</system:String>
+    <system:String x:Key="Test">테스트</system:String>
+    <system:String x:Key="Start">시작</system:String>
+    <system:String x:Key="Stop">중지</system:String>
+    <system:String x:Key="Clear">지우기</system:String>
+    <system:String x:Key="Warning">주의사항</system:String>
+
+    <!-- 탭 -->
+    <system:String x:Key="Tab_Execute">Execute</system:String>
+    <system:String x:Key="Tab_Settings">Settings</system:String>
+    <system:String x:Key="Tab_General">일반</system:String>
+    <system:String x:Key="Tab_ProgramSettings">프로그램 설정</system:String>
+    <system:String x:Key="Tab_Network">네트워크</system:String>
+    <system:String x:Key="Tab_ProgramMonitor">프로그램 감지</system:String>
+
+    <!-- 일반 설정 -->
+    <system:String x:Key="GeneralSettings_Title">일반 설정</system:String>
+    <system:String x:Key="GeneralSettings_RestartRequired">'트레이로 실행' 옵션은 프로그램을 다시 시작한 후에 적용됩니다.</system:String>
+    <system:String x:Key="GeneralSettings_Language">언어 설정</system:String>
+    <system:String x:Key="GeneralSettings_LanguageKorean">한국어</system:String>
+    <system:String x:Key="GeneralSettings_LanguageEnglish">English</system:String>
+    <system:String x:Key="GeneralSettings_LanguageHint">※ 언어를 변경하면 모든 UI가 즉시 변경됩니다.</system:String>
+    <system:String x:Key="GeneralSettings_AutoRun">연결 시 자동 실행</system:String>
+    <system:String x:Key="GeneralSettings_AutoRunTitle">네트워크 연결 시 자동으로 프로그램 실행</system:String>
+    <system:String x:Key="GeneralSettings_AutoRunDesc">프로그램 시작 시 자동으로 네트워크 모니터링을 시작하고, 네트워크가 연결되면 자동으로 등록된 프로그램을 실행합니다.</system:String>
+    <system:String x:Key="GeneralSettings_RunMode">프로그램 실행 모드</system:String>
+    <system:String x:Key="GeneralSettings_TrayRun">트레이로 실행</system:String>
+    <system:String x:Key="GeneralSettings_TrayRunDesc">프로그램 시작 시 창을 표시하지 않고 시스템 트레이에서 실행합니다. 트레이 아이콘을 더블클릭하면 창이 표시됩니다.</system:String>
+    <system:String x:Key="GeneralSettings_Launcher">런처 설정</system:String>
+    <system:String x:Key="GeneralSettings_ViewMode">보기 모드:</system:String>
+    <system:String x:Key="GeneralSettings_ViewModeGrid">기본 보기 (그리드)</system:String>
+    <system:String x:Key="GeneralSettings_ViewModeGroup">그룹별 보기 (타입별로 묶기)</system:String>
+    <system:String x:Key="GeneralSettings_ViewModeDesc">• 기본 보기: 모든 프로그램을 그리드 형태로 표시
+• 그룹별 보기: 실행 모드별로 그룹화하여 표시 (접기/펼치기 가능)</system:String>
+    <system:String x:Key="GeneralSettings_ItemsPerRow">행별 개수:</system:String>
+    <system:String x:Key="GeneralSettings_ItemsPerRowDesc">프로그램 실행 모니터의 런처 탭에서 한 줄에 표시할 프로그램 버튼의 개수를 설정합니다. (권장: 3~8)</system:String>
+    <system:String x:Key="GeneralSettings_NetworkMonitor">네트워크 상태 감지</system:String>
+    <system:String x:Key="GeneralSettings_EnableNetworkMonitor">네트워크 상태 감지 활성화</system:String>
+    <system:String x:Key="GeneralSettings_EnableNetworkMonitorDesc">네트워크 연결이 끊어지면 팝업으로 알려주고, 복구되면 자동으로 팝업을 닫습니다.</system:String>
+    <system:String x:Key="GeneralSettings_CheckInterval">감지 주기 (초):</system:String>
+    <system:String x:Key="GeneralSettings_CheckIntervalDesc">네트워크 상태를 확인할 주기를 설정합니다. (권장: 3~10초)</system:String>
+    <system:String x:Key="GeneralSettings_NetworkMonitorInfo">💡 네트워크 상태 감지 정보</system:String>
+    <system:String x:Key="GeneralSettings_NetworkMonitorInfoText">• 연결이 끊어지면 팝업창에 끊어진 시간이 표시됩니다.
+• 네트워크가 복구되면 자동으로 팝업이 닫힙니다.
+• 연결/끊김 이벤트는 별도 로그 파일에 기록됩니다.</system:String>
+    <system:String x:Key="GeneralSettings_SaveSuccess">일반 설정이 저장되었습니다.</system:String>
+    <system:String x:Key="GeneralSettings_SaveComplete">저장 완료</system:String>
+    <system:String x:Key="GeneralSettings_SaveError">저장 중 오류가 발생했습니다:</system:String>
+    <system:String x:Key="Error">오류</system:String>
+    <system:String x:Key="Validation_Error">유효성 검사 오류</system:String>
+    <system:String x:Key="Validation_ItemsPerRow">런처 행별 개수는 1~20 사이의 숫자여야 합니다.</system:String>
+    <system:String x:Key="Validation_CheckInterval">감지 주기는 1~60 사이의 숫자여야 합니다.</system:String>
+
+    <!-- 네트워크 설정 -->
+    <system:String x:Key="NetworkSettings_Title">네트워크 설정</system:String>
+    <system:String x:Key="NetworkSettings_CheckType">체크 방식:</system:String>
+    <system:String x:Key="NetworkSettings_AddressLabel">주소 (우선순위):</system:String>
+    <system:String x:Key="NetworkSettings_AddressHint">* 한 줄에 하나씩 입력</system:String>
+    <system:String x:Key="NetworkSettings_Port">포트 (TCP용):</system:String>
+    <system:String x:Key="NetworkSettings_Timeout">타임아웃 (ms):</system:String>
+    <system:String x:Key="NetworkSettings_RetryDelay">재시도 대기 (초):</system:String>
+    <system:String x:Key="NetworkSettings_CheckInterval">체크 간격 (초):</system:String>
+    <system:String x:Key="NetworkSettings_TestConnection">연결 테스트</system:String>
+    <system:String x:Key="NetworkSettings_SaveSuccess">네트워크 설정이 저장되었습니다.</system:String>
+    <system:String x:Key="NetworkSettings_Testing">테스트 중...</system:String>
+    <system:String x:Key="NetworkSettings_TestingAddress">테스트 중</system:String>
+    <system:String x:Key="NetworkSettings_NoAddressWarning">주소를 입력해주세요.</system:String>
+    <system:String x:Key="NetworkSettings_Connected">연결 성공</system:String>
+    <system:String x:Key="NetworkSettings_AllFailed">모든 주소 연결 실패</system:String>
+    <system:String x:Key="NetworkSettings_TestSuccess">네트워크 연결 테스트 성공!</system:String>
+    <system:String x:Key="NetworkSettings_TestFailed">네트워크 연결 테스트 실패</system:String>
+    <system:String x:Key="NetworkSettings_TestError">테스트 중 오류 발생</system:String>
+    <system:String x:Key="NetworkSettings_HelpTitle">💡 네트워크 확인 방법</system:String>
+    <system:String x:Key="NetworkSettings_HelpText">• 여러 게이트웨이를 등록하면 순서대로 확인합니다.
+• 하나라도 연결되면 네트워크 연결 성공으로 판단합니다.
+• 모두 실패하면 지정한 시간(재시도 대기시간) 후 다시 시도합니다.
+
+예시 Ping 주소:
+165.186.55.129
+10.162.190.1</system:String>
+    <system:String x:Key="NetworkSettings_CurrentStatus">현재 상태:</system:String>
+    <system:String x:Key="NetworkSettings_NotChecked">확인 안됨</system:String>
+    <system:String x:Key="NetworkSettings_PingAddress">Ping 주소 (우선순위):</system:String>
+    <system:String x:Key="NetworkSettings_PingHint">* 한 줄에 하나씩 IP 주소 입력 (우선순위 순서대로)</system:String>
+    <system:String x:Key="NetworkSettings_HttpAddress">HTTP URL (우선순위):</system:String>
+    <system:String x:Key="NetworkSettings_HttpHint">* 한 줄에 하나씩 URL 입력 (http:// 또는 https:// 포함)</system:String>
+    <system:String x:Key="NetworkSettings_TcpAddress">TCP 주소 (우선순위):</system:String>
+    <system:String x:Key="NetworkSettings_TcpHint">* 한 줄에 하나씩 IP 주소 입력 + 아래 포트 설정</system:String>
+
+    <!-- 네트워크 끊김 팝업 -->
+    <system:String x:Key="NetworkPopup_Title">네트워크 연결 끊김</system:String>
+    <system:String x:Key="NetworkPopup_Message">네트워크 연결이 끊어졌습니다. 확인하세요.</system:String>
+    <system:String x:Key="NetworkPopup_StartTime">끊김 시작:</system:String>
+    <system:String x:Key="NetworkPopup_ElapsedTime">경과 시간:</system:String>
+    <system:String x:Key="NetworkPopup_CheckingNetwork">점검 중인 네트워크:</system:String>
+    <system:String x:Key="NetworkPopup_Checking">확인 중...</system:String>
+    <system:String x:Key="NetworkPopup_NoAddress">등록된 주소 없음</system:String>
+    <system:String x:Key="NetworkPopup_AddressFailed">주소 확인 실패</system:String>
+
+    <!-- Execute 탭 -->
+    <system:String x:Key="Execute_Title">프로그램 실행 모니터</system:String>
+    <system:String x:Key="Execute_Launcher">런처</system:String>
+    <system:String x:Key="Execute_Log">로그</system:String>
+    <system:String x:Key="Execute_Monitor">모니터</system:String>
+    <system:String x:Key="Execute_NetworkMonitoring">네트워크 모니터링</system:String>
+    <system:String x:Key="Execute_StartMonitoring">▶ 모니터링 시작</system:String>
+    <system:String x:Key="Execute_StopMonitoring">■ 모니터링 중지</system:String>
+    <system:String x:Key="Execute_ManualRun">🚀 수동 실행</system:String>
+    <system:String x:Key="Execute_ClearLog">로그 지우기</system:String>
+
+    <!-- 로그 메시지 -->
+    <system:String x:Key="Log_MonitoringStarted">네트워크 모니터링을 시작했습니다.</system:String>
+    <system:String x:Key="Log_MonitoringStopped">네트워크 모니터링을 중지했습니다.</system:String>
+    <system:String x:Key="Log_NetworkConnected">네트워크 연결됨</system:String>
+    <system:String x:Key="Log_NetworkDisconnected">네트워크 연결 끊김</system:String>
+    <system:String x:Key="Log_NetworkRecovered">네트워크 연결 복구</system:String>
+    <system:String x:Key="Log_CheckingNetwork">네트워크 연결 확인 중...</system:String>
+    <system:String x:Key="Log_NoAddress">등록된 주소가 없습니다. 설정에서 주소를 추가해주세요.</system:String>
+    <system:String x:Key="Log_ConnectionSuccess">연결 성공!</system:String>
+    <system:String x:Key="Log_ConnectionFailed">연결 실패</system:String>
+    <system:String x:Key="Log_Success">성공</system:String>
+    <system:String x:Key="Log_Failed">실패</system:String>
+    <system:String x:Key="Log_RetryAfter">초 후 재시도합니다...</system:String>
+    <system:String x:Key="Log_AllProgramsComplete">모든 프로그램 실행 완료!</system:String>
+    <system:String x:Key="Log_LogCleared">로그를 지웠습니다</system:String>
+    <system:String x:Key="Log_StatusMonitorStart">네트워크 상태 감지 시작</system:String>
+    <system:String x:Key="Log_StatusMonitorStop">네트워크 상태 감지 중지</system:String>
+    <system:String x:Key="Log_StatusMonitorContinue">네트워크 상태 감지 계속 진행 중</system:String>
+    <system:String x:Key="Log_CheckInterval">감지 주기</system:String>
+    <system:String x:Key="Log_Timeout">타임아웃</system:String>
+    <system:String x:Key="Log_DisconnectedDuration">끊김 지속 시간</system:String>
+    <system:String x:Key="Log_ConnectedAddress">연결 주소</system:String>
+    <system:String x:Key="Log_CheckMethod">체크 방식</system:String>
+    <system:String x:Key="Log_Program">프로그램</system:String>
+    <system:String x:Key="Log_ProgramSuccess">실행 성공</system:String>
+    <system:String x:Key="Log_ProgramFailed">실행 실패</system:String>
+    <system:String x:Key="Log_ProgramReady">프로그램 준비 완료</system:String>
+    <system:String x:Key="Log_StatusMonitorStarted">네트워크 상태 감지가 시작되었습니다.</system:String>
+    <system:String x:Key="Log_MonitoringStartFailed">모니터링 시작 실패</system:String>
+    <system:String x:Key="Log_MonitoringStopping">모니터링을 중지합니다...</system:String>
+    <system:String x:Key="Log_MonitoringStopFailed">모니터링 중지 실패</system:String>
+    <system:String x:Key="Log_ManualStart">수동으로 프로그램을 실행합니다...</system:String>
+    <system:String x:Key="Log_ManualStartFailed">수동 실행 실패</system:String>
+    <system:String x:Key="Log_NoAddressForType">등록된 주소 없음</system:String>
+    <system:String x:Key="Log_CheckStart">체크 시작</system:String>
+    <system:String x:Key="Log_Checking">확인 중</system:String>
+    <system:String x:Key="Log_AllFailed">모든 주소 연결 실패.</system:String>
+    <system:String x:Key="Log_CheckCancelled">네트워크 확인 작업이 취소되었습니다.</system:String>
+    <system:String x:Key="Log_NoProgramsToRun">실행할 네트워크 연결 실행 모드 프로그램이 없습니다.</system:String>
+    <system:String x:Key="Log_StartingPrograms">네트워크 연결 실행 시작</system:String>
+    <system:String x:Key="Log_ProgramStartError">프로그램 실행 중 오류</system:String>
+    <system:String x:Key="Log_AlreadyRunning">이미 실행 중입니다. 프로세스</system:String>
+    <system:String x:Key="Log_FileNotFound">파일을 찾을 수 없습니다</system:String>
+    <!-- Auto Start / Process Monitor -->
+    <system:String x:Key="Log_AutoStartEnabled">자동 실행 옵션이 활성화되어 있습니다.</system:String>
+    <system:String x:Key="Log_AutoStarting">자동으로 모니터링을 시작합니다...</system:String>
+    <system:String x:Key="Log_AutoStartDisabled">자동 실행 옵션이 비활성화되어 있습니다.</system:String>
+    <system:String x:Key="Log_ManualStartHint">수동으로 모니터링을 시작하려면 '모니터링 시작' 버튼을 클릭하세요.</system:String>
+    <system:String x:Key="Log_InitError">초기화 오류</system:String>
+    <system:String x:Key="Log_NetworkRunComplete">네트워크 연결 실행 완료!</system:String>
+    <system:String x:Key="Log_StartingProcessMonitor">프로그램 감지 모니터링을 시작합니다...</system:String>
+    <system:String x:Key="Log_ProcessMonitorStartFailed">프로그램 감지 모니터링 시작 실패</system:String>
+    <system:String x:Key="Log_AllComplete">모든 프로그램 실행 완료!</system:String>
+    <system:String x:Key="Log_AutoStopping">모니터링을 자동으로 중지합니다.</system:String>
+    <system:String x:Key="Log_ProcessMonitorStarted">프로세스 모니터링을 시작했습니다.</system:String>
+    <system:String x:Key="Log_ProcessMonitorStopped">프로세스 모니터링을 중지했습니다.</system:String>
+    <system:String x:Key="Log_NoProcessToWatch">감시할 프로세스가 등록되지 않았습니다. 설정에서 프로세스를 추가해주세요.</system:String>
+    <system:String x:Key="Log_NoProcessRegistered">감시할 프로세스가 등록되지 않았습니다.</system:String>
+    <system:String x:Key="Log_CheckingProcess">프로세스 확인 중...</system:String>
+    <system:String x:Key="Log_Watching">개 감시</system:String>
+    <system:String x:Key="Log_ProcessDetected">프로세스 감지</system:String>
+    <system:String x:Key="Log_ProcessTerminated">프로세스 종료</system:String>
+    <system:String x:Key="Log_ProcessCheckError">프로세스 확인 오류</system:String>
+    <system:String x:Key="Log_TriggerDetected">트리거 프로세스 감지됨</system:String>
+    <system:String x:Key="Log_AllTriggerTerminated">모든 트리거 프로세스가 종료되었습니다.</system:String>
+    <system:String x:Key="Log_ProcessCheckCancelled">프로세스 확인 작업이 취소되었습니다.</system:String>
+    <system:String x:Key="Log_NoTriggerProgramsToRun">실행할 프로그램 감지 실행 모드 프로그램이 없습니다.</system:String>
+    <system:String x:Key="Log_StartingTriggerPrograms">프로그램 감지 실행 시작</system:String>
+    <system:String x:Key="Log_AllTriggerProgramsComplete">모든 프로그램 감지 실행 모드 프로그램 실행 완료</system:String>
+
+    <!-- 프로그램 설정 -->
+    <system:String x:Key="ProgramSettings_Title">프로그램 설정</system:String>
+    <system:String x:Key="ProgramSettings_AddProgram">+ 프로그램 추가</system:String>
+    <system:String x:Key="ProgramSettings_AddFolder">📁 폴더 추가</system:String>
+    <system:String x:Key="ProgramSettings_EditProgram">프로그램 편집</system:String>
+    <system:String x:Key="ProgramSettings_DeleteConfirm">정말 삭제하시겠습니까?</system:String>
+    <system:String x:Key="ProgramSettings_DeleteTitle">삭제 확인</system:String>
+    <system:String x:Key="ProgramSettings_Filter">필터:</system:String>
+    <system:String x:Key="ProgramSettings_FilterAll">전체</system:String>
+    <system:String x:Key="ProgramSettings_FilterNetwork">네트워크 연결 실행</system:String>
+    <system:String x:Key="ProgramSettings_FilterTrigger">프로그램 감지 실행</system:String>
+    <system:String x:Key="ProgramSettings_FilterLauncher">런처 전용</system:String>
+    <!-- DataGrid Headers -->
+    <system:String x:Key="ProgramSettings_ColEnabled">사용</system:String>
+    <system:String x:Key="ProgramSettings_ColExecutionMode">실행모드</system:String>
+    <system:String x:Key="ProgramSettings_ColOrder">순서</system:String>
+    <system:String x:Key="ProgramSettings_ColOrderTooltip">같은 모드 내에서 실행 순서</system:String>
+    <system:String x:Key="ProgramSettings_ColProgramName">프로그램/폴더명</system:String>
+    <system:String x:Key="ProgramSettings_ColProcessName">프로세스명</system:String>
+    <system:String x:Key="ProgramSettings_ColProcessNameTooltip">실행 중복 체크에 사용 (확장자 제외)</system:String>
+    <system:String x:Key="ProgramSettings_ColPath">경로</system:String>
+    <system:String x:Key="ProgramSettings_ColChangePath">경로변경</system:String>
+    <system:String x:Key="ProgramSettings_ColIcon">아이콘</system:String>
+    <system:String x:Key="ProgramSettings_Browse">찾아보기</system:String>
+    <system:String x:Key="ProgramSettings_ChangeIcon">🖼 변경</system:String>
+    <!-- Launcher Context Menu -->
+    <system:String x:Key="Launcher_OpenFolder">📂 파일 위치 열기</system:String>
+    <system:String x:Key="Launcher_CopyPath">📋 경로 복사</system:String>
+    <system:String x:Key="Launcher_ChangeIcon">🖼 아이콘 변경</system:String>
+    <system:String x:Key="Launcher_ResetIcon">🔄 아이콘 초기화</system:String>
+
+    <!-- 프로그램 감지 -->
+    <system:String x:Key="TriggerSettings_Title">프로그램 감지 설정</system:String>
+    <system:String x:Key="TriggerSettings_InfoTitle">ℹ️ 프로그램 감지 실행</system:String>
+    <system:String x:Key="TriggerSettings_InfoText">네트워크 연결 실행 완료 후, 지정한 프로그램을 감지하여
+프로그램 감지 실행 모드 프로그램을 자동으로 실행합니다.</system:String>
+    <system:String x:Key="TriggerSettings_TargetProcess">감시할 프로그램:</system:String>
+    <system:String x:Key="TriggerSettings_ProcessHint">* 한 줄에 하나씩 프로세스 이름 입력 (확장자 제외)</system:String>
+    <system:String x:Key="TriggerSettings_CheckInterval">체크 주기 (초):</system:String>
+    <system:String x:Key="TriggerSettings_AutoRun">자동 실행:</system:String>
+    <system:String x:Key="TriggerSettings_AutoRunDesc">프로그램 감지 시 자동으로 프로그램 감지 실행 모드 프로그램 실행</system:String>
+    <system:String x:Key="TriggerSettings_AutoStart">감지 시 자동 실행</system:String>
+    <system:String x:Key="TriggerSettings_HelpTitle">💡 프로그램 감지 방법</system:String>
+    <system:String x:Key="TriggerSettings_HelpText">• 지정한 프로그램이 실행되면 자동으로 프로그램 감지 실행 모드 프로그램을 실행합니다.
+• 프로세스 이름은 확장자를 제외하고 입력하세요.
+  (예: FACTOVA.SFC.MainFrame.exe → FACTOVA.SFC.MainFrame)
+• 여러 프로세스 중 하나라도 실행되면 감지됩니다.
+
+예시 프로세스 이름:
+FACTOVA.SFC.MainFrame
+notepad
+chrome</system:String>
+
+</ResourceDictionary>

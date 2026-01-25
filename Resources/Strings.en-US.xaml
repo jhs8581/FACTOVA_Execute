@@ -1,0 +1,245 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Common -->
+    <system:String x:Key="AppTitle">FACTOVA Execute</system:String>
+    <system:String x:Key="Save">Save</system:String>
+    <system:String x:Key="Cancel">Cancel</system:String>
+    <system:String x:Key="Close">Close</system:String>
+    <system:String x:Key="Add">Add</system:String>
+    <system:String x:Key="Delete">Delete</system:String>
+    <system:String x:Key="Edit">Edit</system:String>
+    <system:String x:Key="Test">Test</system:String>
+    <system:String x:Key="Start">Start</system:String>
+    <system:String x:Key="Stop">Stop</system:String>
+    <system:String x:Key="Clear">Clear</system:String>
+    <system:String x:Key="Warning">Warning</system:String>
+
+    <!-- Tabs -->
+    <system:String x:Key="Tab_Execute">Execute</system:String>
+    <system:String x:Key="Tab_Settings">Settings</system:String>
+    <system:String x:Key="Tab_General">General</system:String>
+    <system:String x:Key="Tab_ProgramSettings">Programs</system:String>
+    <system:String x:Key="Tab_Network">Network</system:String>
+    <system:String x:Key="Tab_ProgramMonitor">Process Monitor</system:String>
+
+    <!-- General Settings -->
+    <system:String x:Key="GeneralSettings_Title">General Settings</system:String>
+    <system:String x:Key="GeneralSettings_RestartRequired">'Start in Tray' option will be applied after restarting the program.</system:String>
+    <system:String x:Key="GeneralSettings_Language">Language</system:String>
+    <system:String x:Key="GeneralSettings_LanguageKorean">한국어</system:String>
+    <system:String x:Key="GeneralSettings_LanguageEnglish">English</system:String>
+    <system:String x:Key="GeneralSettings_LanguageHint">※ All UI will change immediately when you change the language.</system:String>
+    <system:String x:Key="GeneralSettings_AutoRun">Auto Run on Connection</system:String>
+    <system:String x:Key="GeneralSettings_AutoRunTitle">Auto-run programs on network connection</system:String>
+    <system:String x:Key="GeneralSettings_AutoRunDesc">Automatically starts network monitoring when the program starts, and runs registered programs when network is connected.</system:String>
+    <system:String x:Key="GeneralSettings_RunMode">Program Run Mode</system:String>
+    <system:String x:Key="GeneralSettings_TrayRun">Start in Tray</system:String>
+    <system:String x:Key="GeneralSettings_TrayRunDesc">Start the program without showing the window. Double-click the tray icon to show the window.</system:String>
+    <system:String x:Key="GeneralSettings_Launcher">Launcher Settings</system:String>
+    <system:String x:Key="GeneralSettings_ViewMode">View Mode:</system:String>
+    <system:String x:Key="GeneralSettings_ViewModeGrid">Grid View</system:String>
+    <system:String x:Key="GeneralSettings_ViewModeGroup">Group View (by type)</system:String>
+    <system:String x:Key="GeneralSettings_ViewModeDesc">• Grid View: Display all programs in a grid layout
+• Group View: Group by execution mode (collapsible)</system:String>
+    <system:String x:Key="GeneralSettings_ItemsPerRow">Items per row:</system:String>
+    <system:String x:Key="GeneralSettings_ItemsPerRowDesc">Set the number of program buttons to display per row in the launcher tab. (Recommended: 3~8)</system:String>
+    <system:String x:Key="GeneralSettings_NetworkMonitor">Network Status Monitor</system:String>
+    <system:String x:Key="GeneralSettings_EnableNetworkMonitor">Enable Network Status Monitor</system:String>
+    <system:String x:Key="GeneralSettings_EnableNetworkMonitorDesc">Shows a popup when network is disconnected and auto-closes when recovered.</system:String>
+    <system:String x:Key="GeneralSettings_CheckInterval">Check Interval (sec):</system:String>
+    <system:String x:Key="GeneralSettings_CheckIntervalDesc">Set the interval to check network status. (Recommended: 3~10 sec)</system:String>
+    <system:String x:Key="GeneralSettings_NetworkMonitorInfo">💡 Network Status Monitor Info</system:String>
+    <system:String x:Key="GeneralSettings_NetworkMonitorInfoText">• A popup will show the disconnected duration when connection is lost.
+• The popup will auto-close when network is recovered.
+• Connection/disconnection events are logged to a separate file.</system:String>
+    <system:String x:Key="GeneralSettings_SaveSuccess">General settings have been saved.</system:String>
+    <system:String x:Key="GeneralSettings_SaveComplete">Save Complete</system:String>
+    <system:String x:Key="GeneralSettings_SaveError">An error occurred while saving:</system:String>
+    <system:String x:Key="Error">Error</system:String>
+    <system:String x:Key="Validation_Error">Validation Error</system:String>
+    <system:String x:Key="Validation_ItemsPerRow">Items per row must be between 1 and 20.</system:String>
+    <system:String x:Key="Validation_CheckInterval">Check interval must be between 1 and 60.</system:String>
+
+    <!-- Network Settings -->
+    <system:String x:Key="NetworkSettings_Title">Network Settings</system:String>
+    <system:String x:Key="NetworkSettings_CheckType">Check Type:</system:String>
+    <system:String x:Key="NetworkSettings_AddressLabel">Addresses (Priority):</system:String>
+    <system:String x:Key="NetworkSettings_AddressHint">* Enter one address per line</system:String>
+    <system:String x:Key="NetworkSettings_Port">Port (for TCP):</system:String>
+    <system:String x:Key="NetworkSettings_Timeout">Timeout (ms):</system:String>
+    <system:String x:Key="NetworkSettings_RetryDelay">Retry Delay (sec):</system:String>
+    <system:String x:Key="NetworkSettings_CheckInterval">Check Interval (sec):</system:String>
+    <system:String x:Key="NetworkSettings_TestConnection">Test Connection</system:String>
+    <system:String x:Key="NetworkSettings_SaveSuccess">Network settings have been saved.</system:String>
+    <system:String x:Key="NetworkSettings_Testing">Testing...</system:String>
+    <system:String x:Key="NetworkSettings_TestingAddress">Testing</system:String>
+    <system:String x:Key="NetworkSettings_NoAddressWarning">Please enter an address.</system:String>
+    <system:String x:Key="NetworkSettings_Connected">Connected</system:String>
+    <system:String x:Key="NetworkSettings_AllFailed">All addresses failed</system:String>
+    <system:String x:Key="NetworkSettings_TestSuccess">Network connection test successful!</system:String>
+    <system:String x:Key="NetworkSettings_TestFailed">Network connection test failed</system:String>
+    <system:String x:Key="NetworkSettings_TestError">Error during test</system:String>
+    <system:String x:Key="NetworkSettings_HelpTitle">💡 Network Check Method</system:String>
+    <system:String x:Key="NetworkSettings_HelpText">• If multiple gateways are registered, they are checked in order.
+• If at least one is connected, network is considered connected.
+• If all fail, retry after the specified delay time.
+
+Example Ping addresses:
+165.186.55.129
+10.162.190.1</system:String>
+    <system:String x:Key="NetworkSettings_CurrentStatus">Current Status:</system:String>
+    <system:String x:Key="NetworkSettings_NotChecked">Not checked</system:String>
+    <system:String x:Key="NetworkSettings_PingAddress">Ping Address (Priority):</system:String>
+    <system:String x:Key="NetworkSettings_PingHint">* Enter one IP address per line (in priority order)</system:String>
+    <system:String x:Key="NetworkSettings_HttpAddress">HTTP URL (Priority):</system:String>
+    <system:String x:Key="NetworkSettings_HttpHint">* Enter one URL per line (include http:// or https://)</system:String>
+    <system:String x:Key="NetworkSettings_TcpAddress">TCP Address (Priority):</system:String>
+    <system:String x:Key="NetworkSettings_TcpHint">* Enter one IP address per line + set port below</system:String>
+
+    <!-- Network Disconnected Popup -->
+    <system:String x:Key="NetworkPopup_Title">Network Disconnected</system:String>
+    <system:String x:Key="NetworkPopup_Message">Network connection has been lost. Please check.</system:String>
+    <system:String x:Key="NetworkPopup_StartTime">Disconnected at:</system:String>
+    <system:String x:Key="NetworkPopup_ElapsedTime">Elapsed Time:</system:String>
+    <system:String x:Key="NetworkPopup_CheckingNetwork">Checking Network:</system:String>
+    <system:String x:Key="NetworkPopup_Checking">Checking...</system:String>
+    <system:String x:Key="NetworkPopup_NoAddress">No registered addresses</system:String>
+    <system:String x:Key="NetworkPopup_AddressFailed">Failed to get addresses</system:String>
+
+    <!-- Execute Tab -->
+    <system:String x:Key="Execute_Title">Program Execution Monitor</system:String>
+    <system:String x:Key="Execute_Launcher">Launcher</system:String>
+    <system:String x:Key="Execute_Log">Log</system:String>
+    <system:String x:Key="Execute_Monitor">Monitor</system:String>
+    <system:String x:Key="Execute_NetworkMonitoring">Network Monitoring</system:String>
+    <system:String x:Key="Execute_StartMonitoring">▶ Start Monitoring</system:String>
+    <system:String x:Key="Execute_StopMonitoring">■ Stop Monitoring</system:String>
+    <system:String x:Key="Execute_ManualRun">🚀 Manual Run</system:String>
+    <system:String x:Key="Execute_ClearLog">Clear Log</system:String>
+
+    <!-- Log Messages -->
+    <system:String x:Key="Log_MonitoringStarted">Network monitoring started.</system:String>
+    <system:String x:Key="Log_MonitoringStopped">Network monitoring stopped.</system:String>
+    <system:String x:Key="Log_NetworkConnected">Network connected</system:String>
+    <system:String x:Key="Log_NetworkDisconnected">Network disconnected</system:String>
+    <system:String x:Key="Log_NetworkRecovered">Network connection recovered</system:String>
+    <system:String x:Key="Log_CheckingNetwork">Checking network connection...</system:String>
+    <system:String x:Key="Log_NoAddress">No addresses registered. Please add addresses in settings.</system:String>
+    <system:String x:Key="Log_ConnectionSuccess">Connection successful!</system:String>
+    <system:String x:Key="Log_ConnectionFailed">Connection failed</system:String>
+    <system:String x:Key="Log_Success">Success</system:String>
+    <system:String x:Key="Log_Failed">Failed</system:String>
+    <system:String x:Key="Log_RetryAfter">Retrying after seconds...</system:String>
+    <system:String x:Key="Log_AllProgramsComplete">All programs executed!</system:String>
+    <system:String x:Key="Log_LogCleared">Log cleared</system:String>
+    <system:String x:Key="Log_StatusMonitorStart">Network status monitoring started</system:String>
+    <system:String x:Key="Log_StatusMonitorStop">Network status monitoring stopped</system:String>
+    <system:String x:Key="Log_StatusMonitorContinue">Network status monitoring continues</system:String>
+    <system:String x:Key="Log_CheckInterval">Check Interval</system:String>
+    <system:String x:Key="Log_Timeout">Timeout</system:String>
+    <system:String x:Key="Log_DisconnectedDuration">Disconnected Duration</system:String>
+    <system:String x:Key="Log_ConnectedAddress">Connected Address</system:String>
+    <system:String x:Key="Log_CheckMethod">Check Method</system:String>
+    <system:String x:Key="Log_Program">Program</system:String>
+    <system:String x:Key="Log_ProgramSuccess">started successfully</system:String>
+    <system:String x:Key="Log_ProgramFailed">failed to start</system:String>
+    <system:String x:Key="Log_ProgramReady">Program ready</system:String>
+    <system:String x:Key="Log_StatusMonitorStarted">Network status monitoring has started.</system:String>
+    <system:String x:Key="Log_MonitoringStartFailed">Failed to start monitoring</system:String>
+    <system:String x:Key="Log_MonitoringStopping">Stopping monitoring...</system:String>
+    <system:String x:Key="Log_MonitoringStopFailed">Failed to stop monitoring</system:String>
+    <system:String x:Key="Log_ManualStart">Starting programs manually...</system:String>
+    <system:String x:Key="Log_ManualStartFailed">Manual start failed</system:String>
+    <system:String x:Key="Log_NoAddressForType">No addresses registered</system:String>
+    <system:String x:Key="Log_CheckStart">Check started</system:String>
+    <system:String x:Key="Log_Checking">Checking</system:String>
+    <system:String x:Key="Log_AllFailed">All addresses failed.</system:String>
+    <system:String x:Key="Log_CheckCancelled">Network check cancelled.</system:String>
+    <system:String x:Key="Log_NoProgramsToRun">No network mode programs to run.</system:String>
+    <system:String x:Key="Log_StartingPrograms">Starting network programs</system:String>
+    <system:String x:Key="Log_ProgramStartError">Error during program execution</system:String>
+    <system:String x:Key="Log_AlreadyRunning">Already running. Process</system:String>
+    <system:String x:Key="Log_FileNotFound">File not found</system:String>
+    <!-- Auto Start / Process Monitor -->
+    <system:String x:Key="Log_AutoStartEnabled">Auto-start option is enabled.</system:String>
+    <system:String x:Key="Log_AutoStarting">Starting monitoring automatically...</system:String>
+    <system:String x:Key="Log_AutoStartDisabled">Auto-start option is disabled.</system:String>
+    <system:String x:Key="Log_ManualStartHint">Click 'Start Monitoring' button to start manually.</system:String>
+    <system:String x:Key="Log_InitError">Initialization error</system:String>
+    <system:String x:Key="Log_NetworkRunComplete">Network run complete!</system:String>
+    <system:String x:Key="Log_StartingProcessMonitor">Starting process monitor...</system:String>
+    <system:String x:Key="Log_ProcessMonitorStartFailed">Failed to start process monitor</system:String>
+    <system:String x:Key="Log_AllComplete">All programs executed!</system:String>
+    <system:String x:Key="Log_AutoStopping">Stopping monitoring automatically.</system:String>
+    <system:String x:Key="Log_ProcessMonitorStarted">Process monitoring started.</system:String>
+    <system:String x:Key="Log_ProcessMonitorStopped">Process monitoring stopped.</system:String>
+    <system:String x:Key="Log_NoProcessToWatch">No process to watch. Please add processes in settings.</system:String>
+    <system:String x:Key="Log_NoProcessRegistered">No process registered to watch.</system:String>
+    <system:String x:Key="Log_CheckingProcess">Checking processes...</system:String>
+    <system:String x:Key="Log_Watching">watching</system:String>
+    <system:String x:Key="Log_ProcessDetected">Process detected</system:String>
+    <system:String x:Key="Log_ProcessTerminated">Process terminated</system:String>
+    <system:String x:Key="Log_ProcessCheckError">Process check error</system:String>
+    <system:String x:Key="Log_TriggerDetected">Trigger process detected</system:String>
+    <system:String x:Key="Log_AllTriggerTerminated">All trigger processes terminated.</system:String>
+    <system:String x:Key="Log_ProcessCheckCancelled">Process check cancelled.</system:String>
+    <system:String x:Key="Log_NoTriggerProgramsToRun">No trigger mode programs to run.</system:String>
+    <system:String x:Key="Log_StartingTriggerPrograms">Starting trigger programs</system:String>
+    <system:String x:Key="Log_AllTriggerProgramsComplete">All trigger mode programs executed.</system:String>
+
+    <!-- Program Settings -->
+    <system:String x:Key="ProgramSettings_Title">Program Settings</system:String>
+    <system:String x:Key="ProgramSettings_AddProgram">+ Add Program</system:String>
+    <system:String x:Key="ProgramSettings_AddFolder">📁 Add Folder</system:String>
+    <system:String x:Key="ProgramSettings_EditProgram">Edit Program</system:String>
+    <system:String x:Key="ProgramSettings_DeleteConfirm">Are you sure you want to delete?</system:String>
+    <system:String x:Key="ProgramSettings_DeleteTitle">Confirm Delete</system:String>
+    <system:String x:Key="ProgramSettings_Filter">Filter:</system:String>
+    <system:String x:Key="ProgramSettings_FilterAll">All</system:String>
+    <system:String x:Key="ProgramSettings_FilterNetwork">Network Run</system:String>
+    <system:String x:Key="ProgramSettings_FilterTrigger">Process Trigger Run</system:String>
+    <system:String x:Key="ProgramSettings_FilterLauncher">Launcher Only</system:String>
+    <!-- DataGrid Headers -->
+    <system:String x:Key="ProgramSettings_ColEnabled">Enabled</system:String>
+    <system:String x:Key="ProgramSettings_ColExecutionMode">Mode</system:String>
+    <system:String x:Key="ProgramSettings_ColOrder">Order</system:String>
+    <system:String x:Key="ProgramSettings_ColOrderTooltip">Execution order within the same mode</system:String>
+    <system:String x:Key="ProgramSettings_ColProgramName">Program/Folder</system:String>
+    <system:String x:Key="ProgramSettings_ColProcessName">Process Name</system:String>
+    <system:String x:Key="ProgramSettings_ColProcessNameTooltip">Used for duplicate check (without extension)</system:String>
+    <system:String x:Key="ProgramSettings_ColPath">Path</system:String>
+    <system:String x:Key="ProgramSettings_ColChangePath">Change Path</system:String>
+    <system:String x:Key="ProgramSettings_ColIcon">Icon</system:String>
+    <system:String x:Key="ProgramSettings_Browse">Browse</system:String>
+    <system:String x:Key="ProgramSettings_ChangeIcon">🖼 Change</system:String>
+    <!-- Launcher Context Menu -->
+    <system:String x:Key="Launcher_OpenFolder">📂 Open File Location</system:String>
+    <system:String x:Key="Launcher_CopyPath">📋 Copy Path</system:String>
+    <system:String x:Key="Launcher_ChangeIcon">🖼 Change Icon</system:String>
+    <system:String x:Key="Launcher_ResetIcon">🔄 Reset Icon</system:String>
+
+    <!-- Trigger Settings -->
+    <system:String x:Key="TriggerSettings_Title">Process Monitor Settings</system:String>
+    <system:String x:Key="TriggerSettings_InfoTitle">ℹ️ Process Trigger Execution</system:String>
+    <system:String x:Key="TriggerSettings_InfoText">After network connection programs are executed, detects the specified program
+and automatically runs programs in Process Trigger mode.</system:String>
+    <system:String x:Key="TriggerSettings_TargetProcess">Target Processes:</system:String>
+    <system:String x:Key="TriggerSettings_ProcessHint">* Enter one process name per line (without extension)</system:String>
+    <system:String x:Key="TriggerSettings_CheckInterval">Check Interval (sec):</system:String>
+    <system:String x:Key="TriggerSettings_AutoRun">Auto Run:</system:String>
+    <system:String x:Key="TriggerSettings_AutoRunDesc">Auto-run Process Trigger mode programs when target process is detected</system:String>
+    <system:String x:Key="TriggerSettings_AutoStart">Auto-run on detection</system:String>
+    <system:String x:Key="TriggerSettings_HelpTitle">💡 Process Detection Method</system:String>
+    <system:String x:Key="TriggerSettings_HelpText">• Automatically runs Process Trigger mode programs when target process starts.
+• Enter process name without extension.
+  (e.g., FACTOVA.SFC.MainFrame.exe → FACTOVA.SFC.MainFrame)
+• Detection triggers when any of the listed processes runs.
+
+Example process names:
+FACTOVA.SFC.MainFrame
+notepad
+chrome</system:String>
+
+</ResourceDictionary>

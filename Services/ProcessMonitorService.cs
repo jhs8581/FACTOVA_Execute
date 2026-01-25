@@ -34,6 +34,8 @@ namespace FACTOVA_Execute.Services
             _programRepository = new ProgramRepository();
         }
 
+        private string L(string key) => LocalizationService.Instance.GetString(key);
+
         /// <summary>
         /// 모니터링 시작
         /// </summary>
@@ -52,7 +54,7 @@ namespace FACTOVA_Execute.Services
             _monitorTimer.AutoReset = true;
             _monitorTimer.Start();
 
-            LogMessage("프로세스 모니터링을 시작했습니다.", LogLevel.Info);
+            LogMessage(L("Log_ProcessMonitorStarted"), LogLevel.Info);
 
             // 즉시 한번 체크
             Task.Run(async () => await CheckProcessAndStartPrograms(_cancellationTokenSource.Token));
@@ -70,7 +72,7 @@ namespace FACTOVA_Execute.Services
             // 실행 중인 작업 즉시 취소
             _cancellationTokenSource?.Cancel();
 
-            LogMessage("프로세스 모니터링을 중지했습니다.", LogLevel.Warning);
+            LogMessage(L("Log_ProcessMonitorStopped"), LogLevel.Warning);
         }
 
         /// <summary>
@@ -86,7 +88,7 @@ namespace FACTOVA_Execute.Services
 
                 if (string.IsNullOrWhiteSpace(settings.TargetProcesses))
                 {
-                    LogMessage("감시할 프로세스가 등록되지 않았습니다. 설정에서 프로세스를 추가해주세요.", LogLevel.Warning);
+                    LogMessage(L("Log_NoProcessToWatch"), LogLevel.Warning);
                     return;
                 }
 
@@ -98,11 +100,11 @@ namespace FACTOVA_Execute.Services
 
                 if (!targetProcesses.Any())
                 {
-                    LogMessage("감시할 프로세스가 등록되지 않았습니다.", LogLevel.Warning);
+                    LogMessage(L("Log_NoProcessRegistered"), LogLevel.Warning);
                     return;
                 }
 
-                LogMessage($"프로세스 확인 중... ({targetProcesses.Count}개 감시)", LogLevel.Info);
+                LogMessage($"{L("Log_CheckingProcess")} ({targetProcesses.Count} {L("Log_Watching")})", LogLevel.Info);
 
                 bool processDetected = false;
                 string? detectedProcessName = null;
@@ -124,7 +126,7 @@ namespace FACTOVA_Execute.Services
                             if (!_detectedProcesses.Contains(processName))
                             {
                                 _detectedProcesses.Add(processName);
-                                LogMessage($"  ✓ 프로세스 감지: {processName} (PID: {string.Join(", ", processes.Select(p => p.Id))})", LogLevel.Success);
+                                LogMessage($"  ✓ {L("Log_ProcessDetected")}: {processName} (PID: {string.Join(", ", processes.Select(p => p.Id))})", LogLevel.Success);
                             }
                             
                             break;
@@ -135,13 +137,13 @@ namespace FACTOVA_Execute.Services
                             if (_detectedProcesses.Contains(processName))
                             {
                                 _detectedProcesses.Remove(processName);
-                                LogMessage($"  ✗ 프로세스 종료: {processName}", LogLevel.Warning);
+                                LogMessage($"  ✗ {L("Log_ProcessTerminated")}: {processName}", LogLevel.Warning);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        LogMessage($"  ✗ 프로세스 확인 오류 ({processName}): {ex.Message}", LogLevel.Error);
+                        LogMessage($"  ✗ {L("Log_ProcessCheckError")} ({processName}): {ex.Message}", LogLevel.Error);
                     }
                 }
 
@@ -150,7 +152,7 @@ namespace FACTOVA_Execute.Services
                 // 프로세스 감지 및 아직 프로그램을 실행하지 않은 경우
                 if (processDetected && !_isProgramsStarted)
                 {
-                    LogMessage($"트리거 프로세스 감지됨: {detectedProcessName}", LogLevel.Success);
+                    LogMessage($"{L("Log_TriggerDetected")}: {detectedProcessName}", LogLevel.Success);
 
                     // 자동 실행 옵션이 켜져있으면 프로그램 실행
                     if (settings.AutoStartPrograms)
@@ -164,16 +166,16 @@ namespace FACTOVA_Execute.Services
                     // 모든 감시 프로세스가 종료되면 상태 초기화
                     _isProgramsStarted = false;
                     _detectedProcesses.Clear();
-                    LogMessage("모든 트리거 프로세스가 종료되었습니다.", LogLevel.Warning);
+                    LogMessage(L("Log_AllTriggerTerminated"), LogLevel.Warning);
                 }
             }
             catch (OperationCanceledException)
             {
-                LogMessage("프로세스 확인 작업이 취소되었습니다.", LogLevel.Info);
+                LogMessage(L("Log_ProcessCheckCancelled"), LogLevel.Info);
             }
             catch (Exception ex)
             {
-                LogMessage($"오류 발생: {ex.Message}", LogLevel.Error);
+                LogMessage($"{L("Error")}: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -191,11 +193,11 @@ namespace FACTOVA_Execute.Services
 
                 if (!programs.Any())
                 {
-                    LogMessage("실행할 프로그램 감지 실행 모드 프로그램이 없습니다.", LogLevel.Warning);
+                    LogMessage(L("Log_NoTriggerProgramsToRun"), LogLevel.Warning);
                     return;
                 }
 
-                LogMessage($"프로그램 감지 실행 시작 ({programs.Count}개)...", LogLevel.Info);
+                LogMessage($"{L("Log_StartingTriggerPrograms")} ({programs.Count})...", LogLevel.Info);
 
                 foreach (var program in programs)
                 {
@@ -206,11 +208,11 @@ namespace FACTOVA_Execute.Services
                 }
 
                 _isProgramsStarted = true;
-                LogMessage("모든 프로그램 감지 실행 모드 프로그램 실행 완료", LogLevel.Success);
+                LogMessage(L("Log_AllTriggerProgramsComplete"), LogLevel.Success);
             }
             catch (Exception ex)
             {
-                LogMessage($"프로그램 실행 중 오류: {ex.Message}", LogLevel.Error);
+                LogMessage($"{L("Log_ProgramStartError")}: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -227,14 +229,14 @@ namespace FACTOVA_Execute.Services
                     var runningProcesses = Process.GetProcessesByName(program.ProcessName);
                     if (runningProcesses.Any())
                     {
-                        LogMessage($"[{program.ProgramName}] 이미 실행 중입니다. 프로세스: {program.ProcessName}", LogLevel.Warning);
+                        LogMessage($"[{program.ProgramName}] {L("Log_AlreadyRunning")}: {program.ProcessName}", LogLevel.Warning);
                         return;
                     }
                 }
 
                 if (!File.Exists(program.ProgramPath))
                 {
-                    LogMessage($"[{program.ProgramName}] 파일을 찾을 수 없습니다: {program.ProgramPath}", LogLevel.Error);
+                    LogMessage($"[{program.ProgramName}] {L("Log_FileNotFound")}: {program.ProgramPath}", LogLevel.Error);
                     return;
                 }
 
@@ -249,13 +251,13 @@ namespace FACTOVA_Execute.Services
                 };
 
                 Process.Start(startInfo);
-                LogMessage($"[{program.ProgramName}] 실행 성공: {program.ProgramPath}", LogLevel.Success);
+                LogMessage($"[{program.ProgramName}] {L("Log_ProgramSuccess")}: {program.ProgramPath}", LogLevel.Success);
 
                 await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                LogMessage($"[{program.ProgramName}] 실행 실패: {ex.Message}", LogLevel.Error);
+                LogMessage($"[{program.ProgramName}] {L("Log_ProgramFailed")}: {ex.Message}", LogLevel.Error);
             }
         }
 

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using FACTOVA_Execute.Data;
 using FACTOVA_Execute.Models;
+using FACTOVA_Execute.Services;
 using Microsoft.Win32;
 
 namespace FACTOVA_Execute.Views
@@ -21,6 +22,56 @@ namespace FACTOVA_Execute.Views
             InitializeComponent();
             _repository = new ProgramRepository();
             LoadPrograms();
+            
+            // Loaded/Unloaded 이벤트로 언어 변경 구독 관리
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            LocalizationService.Instance.LanguageChanged += OnLanguageChanged;
+            // 탭 전환 후 로드될 때마다 헤더 업데이트
+            UpdateDataGridHeaders();
+            ProgramsDataGrid.Items.Refresh();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            LocalizationService.Instance.LanguageChanged -= OnLanguageChanged;
+        }
+
+        /// <summary>
+        /// 언어 변경 시 호출
+        /// </summary>
+        private void OnLanguageChanged()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                UpdateDataGridHeaders();
+                // DataGrid 새로고침하여 컨버터 다시 적용
+                ProgramsDataGrid.Items.Refresh();
+            });
+        }
+
+        /// <summary>
+        /// DataGrid 헤더 다국어 적용
+        /// </summary>
+        private void UpdateDataGridHeaders()
+        {
+            var L = LocalizationService.Instance;
+            
+            if (ProgramsDataGrid.Columns.Count >= 8)
+            {
+                ProgramsDataGrid.Columns[0].Header = L["ProgramSettings_ColEnabled"];
+                ProgramsDataGrid.Columns[1].Header = L["ProgramSettings_ColExecutionMode"];
+                ProgramsDataGrid.Columns[2].Header = L["ProgramSettings_ColOrder"];
+                ProgramsDataGrid.Columns[3].Header = L["ProgramSettings_ColProgramName"];
+                ProgramsDataGrid.Columns[4].Header = L["ProgramSettings_ColProcessName"];
+                ProgramsDataGrid.Columns[5].Header = L["ProgramSettings_ColPath"];
+                ProgramsDataGrid.Columns[6].Header = L["ProgramSettings_ColChangePath"];
+                ProgramsDataGrid.Columns[7].Header = L["ProgramSettings_ColIcon"];
+            }
         }
 
         /// <summary>
@@ -38,6 +89,7 @@ namespace FACTOVA_Execute.Views
                 FilterComboBox.SelectedIndex = 0; // "전체" 선택
             }
         }
+
 
         /// <summary>
         /// 필터 적용

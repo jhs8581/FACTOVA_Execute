@@ -27,6 +27,8 @@ namespace FACTOVA_Execute.Services
             }
         }
 
+        private string L(string key) => LocalizationService.Instance.GetString(key);
+
         /// <summary>
         /// 로그 파일 경로
         /// </summary>
@@ -46,29 +48,29 @@ namespace FACTOVA_Execute.Services
             if (_lastDisconnectedTime.HasValue)
             {
                 var duration = DateTime.Now - _lastDisconnectedTime.Value;
-                details.Add("네트워크 연결 복구");
-                details.Add($"끊김 지속 시간: {duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}");
+                details.Add(L("Log_NetworkRecovered"));
+                details.Add($"{L("Log_DisconnectedDuration")}: {duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}");
                 _lastDisconnectedTime = null;
             }
             else
             {
-                details.Add("네트워크 연결됨");
+                details.Add(L("Log_NetworkConnected"));
             }
             
             if (!string.IsNullOrEmpty(connectedAddress))
             {
-                details.Add($"연결 주소: {connectedAddress}");
+                details.Add($"{L("Log_ConnectedAddress")}: {connectedAddress}");
             }
             
             if (!string.IsNullOrEmpty(checkType))
             {
-                details.Add($"체크 방식: {checkType}");
+                details.Add($"{L("Log_CheckMethod")}: {checkType}");
             }
             
             WriteLog(string.Join(" | ", details));
             
             // 연결 복구 후 감지 재시작 로그
-            WriteLog("네트워크 상태 감지 계속 진행 중");
+            WriteLog(L("Log_StatusMonitorContinue"));
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace FACTOVA_Execute.Services
             var settings = _networkRepository.GetSettings();
             var allAddresses = settings.GetAllAddresses();
             
-            var details = new List<string> { "네트워크 연결 끊김" };
+            var details = new List<string> { L("Log_NetworkDisconnected") };
             
             // 점검 중인 주소 목록 추가
             foreach (var kvp in allAddresses)
@@ -100,7 +102,7 @@ namespace FACTOVA_Execute.Services
         /// </summary>
         public void LogCheckResult(string checkType, string address, bool success, string? errorMessage = null)
         {
-            var status = success ? "성공" : "실패";
+            var status = success ? L("Log_Success") : L("Log_Failed");
             var message = $"[{checkType}] {address} - {status}";
             
             if (!success && !string.IsNullOrEmpty(errorMessage))
@@ -122,9 +124,9 @@ namespace FACTOVA_Execute.Services
             
             var details = new List<string>
             {
-                "네트워크 상태 감지 시작",
-                $"감지 주기: {generalSettings.NetworkCheckIntervalSeconds}초",
-                $"타임아웃: {networkSettings.TimeoutMs}ms"
+                L("Log_StatusMonitorStart"),
+                $"{L("Log_CheckInterval")}: {generalSettings.NetworkCheckIntervalSeconds}s",
+                $"{L("Log_Timeout")}: {networkSettings.TimeoutMs}ms"
             };
             
             // 등록된 주소 목록
@@ -144,7 +146,7 @@ namespace FACTOVA_Execute.Services
         /// </summary>
         public void LogMonitoringStopped()
         {
-            WriteLog("네트워크 상태 감지 중지");
+            WriteLog(L("Log_StatusMonitorStop"));
         }
 
         /// <summary>
@@ -152,8 +154,8 @@ namespace FACTOVA_Execute.Services
         /// </summary>
         public void LogProgramStarted(string programName, string programPath, bool success, string? errorMessage = null)
         {
-            var status = success ? "실행 성공" : "실행 실패";
-            var message = $"프로그램 {status}: {programName} ({programPath})";
+            var status = success ? L("Log_ProgramSuccess") : L("Log_ProgramFailed");
+            var message = $"{L("Log_Program")} {status}: {programName} ({programPath})";
             
             if (!success && !string.IsNullOrEmpty(errorMessage))
             {

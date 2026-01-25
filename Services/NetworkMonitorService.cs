@@ -37,6 +37,8 @@ namespace FACTOVA_Execute.Services
             _programRepository = new ProgramRepository();
         }
 
+        private string L(string key) => LocalizationService.Instance.GetString(key);
+
         /// <summary>
         /// 모니터링 시작
         /// </summary>
@@ -55,7 +57,7 @@ namespace FACTOVA_Execute.Services
             _monitorTimer.AutoReset = true;
             _monitorTimer.Start();
 
-            LogMessage("네트워크 모니터링을 시작했습니다.", LogLevel.Info);
+            LogMessage(L("Log_MonitoringStarted"), LogLevel.Info);
             
             // 즉시 한번 체크
             Task.Run(async () => await CheckNetworkAndStartPrograms(_cancellationTokenSource.Token));
@@ -73,7 +75,7 @@ namespace FACTOVA_Execute.Services
             // 실행 중인 작업 즉시 취소
             _cancellationTokenSource?.Cancel();
             
-            LogMessage("네트워크 모니터링을 중지했습니다.", LogLevel.Warning);
+            LogMessage(L("Log_MonitoringStopped"), LogLevel.Warning);
         }
 
         /// <summary>
@@ -94,11 +96,11 @@ namespace FACTOVA_Execute.Services
                 var hasAnyAddress = allAddresses.Values.Any(list => list.Any());
                 if (!hasAnyAddress)
                 {
-                    LogMessage("등록된 주소가 없습니다. 설정에서 주소를 추가해주세요.", LogLevel.Warning);
+                    LogMessage(L("Log_NoAddress"), LogLevel.Warning);
                     return;
                 }
 
-                LogMessage("네트워크 연결 확인 중... (Ping, HTTP, TCP 병렬 체크)", LogLevel.Info);
+                LogMessage(L("Log_CheckingNetwork"), LogLevel.Info);
 
                 bool isConnected = false;
                 string? connectedAddress = null;
@@ -114,17 +116,17 @@ namespace FACTOVA_Execute.Services
 
                     if (!addresses.Any())
                     {
-                        LogMessage($"  [{checkType}] 등록된 주소 없음", LogLevel.Info);
+                        LogMessage($"  [{checkType}] {L("Log_NoAddressForType")}", LogLevel.Info);
                         continue;
                     }
 
-                    LogMessage($"  [{checkType}] 체크 시작 ({addresses.Count}개 주소)", LogLevel.Info);
+                    LogMessage($"  [{checkType}] {L("Log_CheckStart")} ({addresses.Count})", LogLevel.Info);
 
                     foreach (var address in addresses)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         
-                        LogMessage($"    → {address} 확인 중...", LogLevel.Info);
+                        LogMessage($"    → {address} {L("Log_Checking")}...", LogLevel.Info);
 
                         bool result = false;
                         try
@@ -148,7 +150,7 @@ namespace FACTOVA_Execute.Services
                         }
                         catch (Exception ex)
                         {
-                            LogMessage($"    ✗ {address} 오류: {ex.Message}", LogLevel.Warning);
+                            LogMessage($"    ✗ {address} {L("Error")}: {ex.Message}", LogLevel.Warning);
                             continue;
                         }
 
@@ -157,12 +159,12 @@ namespace FACTOVA_Execute.Services
                             isConnected = true;
                             connectedAddress = address;
                             connectedMethod = checkType;
-                            LogMessage($"    ✓ {address} 연결 성공!", LogLevel.Success);
+                            LogMessage($"    ✓ {address} {L("Log_ConnectionSuccess")}", LogLevel.Success);
                             break; // 하나 성공하면 해당 타입은 중단
                         }
                         else
                         {
-                            LogMessage($"    ✗ {address} 연결 실패", LogLevel.Warning);
+                            LogMessage($"    ✗ {address} {L("Log_ConnectionFailed")}", LogLevel.Warning);
                         }
                     }
 
@@ -178,7 +180,7 @@ namespace FACTOVA_Execute.Services
                 if (isConnected && !_isNetworkConnected)
                 {
                     _isNetworkConnected = true;
-                    LogMessage($"네트워크 연결됨: {connectedAddress} ({connectedMethod})", LogLevel.Success);
+                    LogMessage($"{L("Log_NetworkConnected")}: {connectedAddress} ({connectedMethod})", LogLevel.Success);
 
                     // 자동 실행 옵션이 켜져있고 아직 실행하지 않았으면 프로그램 실행
                     if (settings.AutoStartPrograms && !_isProgramsStarted)
@@ -193,25 +195,25 @@ namespace FACTOVA_Execute.Services
                 {
                     _isNetworkConnected = false;
                     _isProgramsStarted = false;
-                    LogMessage("네트워크 연결 끊김", LogLevel.Error);
+                    LogMessage(L("Log_NetworkDisconnected"), LogLevel.Error);
                     
                     // 재시도 대기
-                    LogMessage($"{settings.RetryDelaySeconds}초 후 재시도합니다...", LogLevel.Warning);
+                    LogMessage($"{settings.RetryDelaySeconds}{L("Log_RetryAfter")}", LogLevel.Warning);
                     await Task.Delay(settings.RetryDelaySeconds * 1000, cancellationToken);
                 }
                 else if (!isConnected)
                 {
-                    LogMessage($"모든 주소 연결 실패. {settings.RetryDelaySeconds}초 후 재시도...", LogLevel.Warning);
+                    LogMessage($"{L("Log_AllFailed")} {settings.RetryDelaySeconds}{L("Log_RetryAfter")}", LogLevel.Warning);
                     await Task.Delay(settings.RetryDelaySeconds * 1000, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
             {
-                LogMessage("네트워크 확인 작업이 취소되었습니다.", LogLevel.Info);
+                LogMessage(L("Log_CheckCancelled"), LogLevel.Info);
             }
             catch (Exception ex)
             {
-                LogMessage($"오류 발생: {ex.Message}", LogLevel.Error);
+                LogMessage($"{L("Error")}: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -229,11 +231,11 @@ namespace FACTOVA_Execute.Services
 
                 if (!programs.Any())
                 {
-                    LogMessage("실행할 네트워크 연결 실행 모드 프로그램이 없습니다.", LogLevel.Warning);
+                    LogMessage(L("Log_NoProgramsToRun"), LogLevel.Warning);
                     return;
                 }
 
-                LogMessage($"네트워크 연결 실행 시작 ({programs.Count}개)...", LogLevel.Info);
+                LogMessage($"{L("Log_StartingPrograms")} ({programs.Count})...", LogLevel.Info);
 
                 foreach (var program in programs)
                 {
@@ -244,11 +246,11 @@ namespace FACTOVA_Execute.Services
                 }
 
                 _isProgramsStarted = true;
-                LogMessage("모든 네트워크 연결 실행 모드 프로그램 실행 완료", LogLevel.Success);
+                LogMessage(L("Log_AllProgramsComplete"), LogLevel.Success);
             }
             catch (Exception ex)
             {
-                LogMessage($"프로그램 실행 중 오류: {ex.Message}", LogLevel.Error);
+                LogMessage($"{L("Log_ProgramStartError")}: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -265,14 +267,14 @@ namespace FACTOVA_Execute.Services
                     var runningProcesses = Process.GetProcessesByName(program.ProcessName);
                     if (runningProcesses.Any())
                     {
-                        LogMessage($"[{program.ProgramName}] 이미 실행 중입니다. 프로세스: {program.ProcessName}", LogLevel.Warning);
+                        LogMessage($"[{program.ProgramName}] {L("Log_AlreadyRunning")}: {program.ProcessName}", LogLevel.Warning);
                         return;
                     }
                 }
 
                 if (!File.Exists(program.ProgramPath))
                 {
-                    LogMessage($"[{program.ProgramName}] 파일을 찾을 수 없습니다: {program.ProgramPath}", LogLevel.Error);
+                    LogMessage($"[{program.ProgramName}] {L("Log_FileNotFound")}: {program.ProgramPath}", LogLevel.Error);
                     return;
                 }
 
@@ -287,13 +289,13 @@ namespace FACTOVA_Execute.Services
                 };
 
                 Process.Start(startInfo);
-                LogMessage($"[{program.ProgramName}] 실행 성공: {program.ProgramPath}", LogLevel.Success);
+                LogMessage($"[{program.ProgramName}] {L("Log_ProgramSuccess")}: {program.ProgramPath}", LogLevel.Success);
 
                 await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                LogMessage($"[{program.ProgramName}] 실행 실패: {ex.Message}", LogLevel.Error);
+                LogMessage($"[{program.ProgramName}] {L("Log_ProgramFailed")}: {ex.Message}", LogLevel.Error);
             }
         }
 

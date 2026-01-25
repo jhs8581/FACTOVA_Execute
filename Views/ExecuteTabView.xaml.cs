@@ -68,6 +68,7 @@ namespace FACTOVA_Execute.Views
 
             try
             {
+                var L = Services.LocalizationService.Instance;
                 var settings = _generalRepository.GetSettings();
                 
                 // 네트워크 상태 감지 시작 (설정에서 활성화된 경우)
@@ -75,26 +76,26 @@ namespace FACTOVA_Execute.Views
                 {
                     _networkStatusMonitor = new NetworkStatusMonitor();
                     _networkStatusMonitor.StartMonitoring();
-                    AddLogMessage("네트워크 상태 감지가 시작되었습니다.", NetworkMonitorService.LogLevel.Info);
+                    AddLogMessage(L["Log_StatusMonitorStarted"], NetworkMonitorService.LogLevel.Info);
                 }
                 
                 if (settings.AutoStartMonitoring)
                 {
-                    AddLogMessage("자동 실행 옵션이 활성화되어 있습니다.", NetworkMonitorService.LogLevel.Info);
-                    AddLogMessage("자동으로 모니터링을 시작합니다...", NetworkMonitorService.LogLevel.Info);
+                    AddLogMessage(L["Log_AutoStartEnabled"], NetworkMonitorService.LogLevel.Info);
+                    AddLogMessage(L["Log_AutoStarting"], NetworkMonitorService.LogLevel.Info);
                     
                     // 자동으로 모니터링 시작
                     StartMonitoring();
                 }
                 else
                 {
-                    AddLogMessage("자동 실행 옵션이 비활성화되어 있습니다.", NetworkMonitorService.LogLevel.Info);
-                    AddLogMessage("수동으로 모니터링을 시작하려면 '모니터링 시작' 버튼을 클릭하세요.", NetworkMonitorService.LogLevel.Info);
+                    AddLogMessage(L["Log_AutoStartDisabled"], NetworkMonitorService.LogLevel.Info);
+                    AddLogMessage(L["Log_ManualStartHint"], NetworkMonitorService.LogLevel.Info);
                 }
             }
             catch (Exception ex)
             {
-                AddLogMessage($"초기화 오류: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                AddLogMessage($"{Services.LocalizationService.Instance["Log_InitError"]}: {ex.Message}", NetworkMonitorService.LogLevel.Error);
             }
         }
 
@@ -354,12 +355,13 @@ namespace FACTOVA_Execute.Views
         /// </summary>
         private ContextMenu CreateButtonContextMenu(Models.ProgramInfo program)
         {
+            var L = Services.LocalizationService.Instance;
             var contextMenu = new ContextMenu();
 
             // 경로 열기 메뉴
             var openFolderItem = new MenuItem
             {
-                Header = "📂 파일 위치 열기",
+                Header = L["Launcher_OpenFolder"],
                 Tag = program
             };
             openFolderItem.Click += ContextMenu_OpenFolder_Click;
@@ -368,7 +370,7 @@ namespace FACTOVA_Execute.Views
             // 경로 복사 메뉴
             var copyPathItem = new MenuItem
             {
-                Header = "📋 경로 복사",
+                Header = L["Launcher_CopyPath"],
                 Tag = program
             };
             copyPathItem.Click += ContextMenu_CopyPath_Click;
@@ -380,7 +382,7 @@ namespace FACTOVA_Execute.Views
             // 아이콘 변경 메뉴
             var changeIconItem = new MenuItem
             {
-                Header = "🖼 아이콘 변경",
+                Header = L["Launcher_ChangeIcon"],
                 Tag = program
             };
             changeIconItem.Click += ContextMenu_ChangeIcon_Click;
@@ -391,7 +393,7 @@ namespace FACTOVA_Execute.Views
             {
                 var resetIconItem = new MenuItem
                 {
-                    Header = "🔄 아이콘 초기화",
+                    Header = L["Launcher_ResetIcon"],
                     Tag = program
                 };
                 resetIconItem.Click += ContextMenu_ResetIcon_Click;
@@ -871,7 +873,7 @@ namespace FACTOVA_Execute.Views
             // 커스텀 컬러라이저 적용
             LogEditor.TextArea.TextView.LineTransformers.Add(new LogColorizer());
             
-            AddLogMessage("프로그램 준비 완료", NetworkMonitorService.LogLevel.Success);
+            AddLogMessage(Services.LocalizationService.Instance["Log_ProgramReady"], NetworkMonitorService.LogLevel.Success);
         }
 
         /// <summary>
@@ -881,6 +883,8 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
+                var L = Services.LocalizationService.Instance;
+                
                 // 기존 서비스 정리
                 _networkMonitorService?.Dispose();
                 _processMonitorService?.Dispose();
@@ -893,7 +897,7 @@ namespace FACTOVA_Execute.Views
                 {
                     _networkStatusMonitor = new NetworkStatusMonitor();
                     _networkStatusMonitor.StartMonitoring();
-                    AddLogMessage("네트워크 상태 감지가 시작되었습니다.", NetworkMonitorService.LogLevel.Info);
+                    AddLogMessage(L["Log_StatusMonitorStarted"], NetworkMonitorService.LogLevel.Info);
                 }
 
                 // 항상 네트워크 모니터링부터 시작
@@ -907,7 +911,7 @@ namespace FACTOVA_Execute.Views
             }
             catch (Exception ex)
             {
-                AddLogMessage($"모니터링 시작 실패: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                AddLogMessage($"{Services.LocalizationService.Instance["Log_MonitoringStartFailed"]}: {ex.Message}", NetworkMonitorService.LogLevel.Error);
             }
         }
 
@@ -926,7 +930,8 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
-                AddLogMessage("모니터링을 중지합니다...", NetworkMonitorService.LogLevel.Warning);
+                var L = Services.LocalizationService.Instance;
+                AddLogMessage(L["Log_MonitoringStopping"], NetworkMonitorService.LogLevel.Warning);
                 
                 _networkMonitorService?.StopMonitoring();
                 _networkMonitorService?.Dispose();
@@ -942,11 +947,11 @@ namespace FACTOVA_Execute.Views
                 StartMonitorButton.IsEnabled = true;
                 StopMonitorButton.IsEnabled = false;
                 
-                AddLogMessage("모니터링이 중지되었습니다.", NetworkMonitorService.LogLevel.Info);
+                AddLogMessage(L["Log_MonitoringStopped"], NetworkMonitorService.LogLevel.Info);
             }
             catch (Exception ex)
             {
-                AddLogMessage($"모니터링 중지 실패: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                AddLogMessage($"{Services.LocalizationService.Instance["Log_MonitoringStopFailed"]}: {ex.Message}", NetworkMonitorService.LogLevel.Error);
             }
         }
 
@@ -957,7 +962,7 @@ namespace FACTOVA_Execute.Views
         {
             try
             {
-                AddLogMessage("수동으로 프로그램을 실행합니다...", NetworkMonitorService.LogLevel.Info);
+                AddLogMessage(Services.LocalizationService.Instance["Log_ManualStart"], NetworkMonitorService.LogLevel.Info);
                 
                 var service = new NetworkMonitorService();
                 service.LogMessageReceived += OnLogMessageReceived;
@@ -965,7 +970,7 @@ namespace FACTOVA_Execute.Views
             }
             catch (Exception ex)
             {
-                AddLogMessage($"수동 실행 실패: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                AddLogMessage($"{Services.LocalizationService.Instance["Log_ManualStartFailed"]}: {ex.Message}", NetworkMonitorService.LogLevel.Error);
             }
         }
 
@@ -1010,9 +1015,10 @@ namespace FACTOVA_Execute.Views
         {
             Dispatcher.Invoke(() =>
             {
+                var L = Services.LocalizationService.Instance;
                 AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
-                AddLogMessage("모든 프로그램 실행 완료!", NetworkMonitorService.LogLevel.Success);
-                AddLogMessage("모니터링을 자동으로 중지합니다.", NetworkMonitorService.LogLevel.Info);
+                AddLogMessage(L["Log_AllComplete"], NetworkMonitorService.LogLevel.Success);
+                AddLogMessage(L["Log_AutoStopping"], NetworkMonitorService.LogLevel.Info);
                 AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
                 
                 // 모니터링 중지
@@ -1036,9 +1042,10 @@ namespace FACTOVA_Execute.Views
         {
             Dispatcher.Invoke(() =>
             {
+                var L = Services.LocalizationService.Instance;
                 AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
-                AddLogMessage("네트워크 연결 실행 완료!", NetworkMonitorService.LogLevel.Success);
-                AddLogMessage("프로그램 감지 모니터링을 시작합니다...", NetworkMonitorService.LogLevel.Info);
+                AddLogMessage(L["Log_NetworkRunComplete"], NetworkMonitorService.LogLevel.Success);
+                AddLogMessage(L["Log_StartingProcessMonitor"], NetworkMonitorService.LogLevel.Info);
                 AddLogMessage("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NetworkMonitorService.LogLevel.Success);
                 
                 // 네트워크 모니터링 중지
@@ -1056,7 +1063,7 @@ namespace FACTOVA_Execute.Views
                 }
                 catch (Exception ex)
                 {
-                    AddLogMessage($"프로그램 감지 모니터링 시작 실패: {ex.Message}", NetworkMonitorService.LogLevel.Error);
+                    AddLogMessage($"{L["Log_ProcessMonitorStartFailed"]}: {ex.Message}", NetworkMonitorService.LogLevel.Error);
                 }
             });
         }

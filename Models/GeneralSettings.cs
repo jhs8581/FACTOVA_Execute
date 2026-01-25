@@ -24,5 +24,10 @@
         /// 네트워크 상태 감지 주기 (초)
         /// </summary>
         public int NetworkCheckIntervalSeconds { get; set; } = 5;
+        
+        /// <summary>
+        /// 언어 설정: "ko-KR" (한국어) 또는 "en-US" (영어)
+        /// </summary>
+        public string Language { get; set; } = "ko-KR";
     }
 }

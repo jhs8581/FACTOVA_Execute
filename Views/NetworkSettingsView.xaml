@@ -74,7 +74,7 @@
 
         <!-- 제목 -->
         <TextBlock Grid.Row="0" 
-                   Text="네트워크 설정" 
+                   Text="{DynamicResource NetworkSettings_Title}" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#212529"
@@ -95,7 +95,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="체크 방식:" 
+                                   Text="{DynamicResource NetworkSettings_CheckType}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
@@ -145,7 +145,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="포트 (TCP용):" 
+                                   Text="{DynamicResource NetworkSettings_Port}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
@@ -163,7 +163,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="타임아웃 (ms):" 
+                                   Text="{DynamicResource NetworkSettings_Timeout}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
@@ -181,7 +181,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="재시도 대기시간 (초):" 
+                                   Text="{DynamicResource NetworkSettings_RetryDelay}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
@@ -199,7 +199,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="체크 주기 (초):" 
+                                   Text="{DynamicResource NetworkSettings_CheckInterval}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
@@ -219,11 +219,11 @@
                             Margin="0,10,0,0">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                <TextBlock Text="현재 상태: " 
+                                <TextBlock Text="{DynamicResource NetworkSettings_CurrentStatus}" 
                                            FontWeight="SemiBold"
                                            VerticalAlignment="Center"/>
                                 <TextBlock x:Name="StatusTextBlock" 
-                                           Text="확인 안됨" 
+                                           Text="{DynamicResource NetworkSettings_NotChecked}" 
                                            Foreground="#6C757D"
                                            VerticalAlignment="Center"/>
                             </StackPanel>
@@ -243,23 +243,14 @@
                             CornerRadius="3"
                             Margin="0,15,0,0">
                         <StackPanel>
-                            <TextBlock Text="💡 네트워크 확인 방법" 
+                            <TextBlock Text="{DynamicResource NetworkSettings_HelpTitle}" 
                                        FontWeight="Bold"
                                        Foreground="#856404"
                                        Margin="0,0,0,5"/>
-                            <TextBlock x:Name="ExampleTextBlock"
-                                       TextWrapping="Wrap" 
+                            <TextBlock TextWrapping="Wrap" 
                                        Foreground="#856404"
-                                       FontSize="12">
-                                <Run Text="• 여러 게이트웨이를 등록하면 순서대로 확인합니다."/><LineBreak/>
-                                <Run Text="• 하나라도 연결되면 네트워크 연결 성공으로 판단합니다."/><LineBreak/>
-                                <Run Text="• 모두 실패하면 지정한 시간(재시도 대기시간) 후 다시 시도합니다."/><LineBreak/><LineBreak/>
-                                <Run Text="예시 Ping 주소:"/><LineBreak/>
-                                <Run Text="165.186.55.129"/><LineBreak/>
-                                <Run Text="10.162.190.1"/><LineBreak/>
-                                <Run Text="165.186.47.1"/><LineBreak/>
-                                <Run Text="10.162.35.1"/>
-                            </TextBlock>
+                                       FontSize="12"
+                                       Text="{DynamicResource NetworkSettings_HelpText}"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -272,12 +263,12 @@
                     HorizontalAlignment="Right"
                     Margin="0,10,0,0">
             <Button x:Name="TestButton" 
-                    Content="연결 테스트" 
+                    Content="{DynamicResource NetworkSettings_TestConnection}" 
                     Style="{StaticResource TestButtonStyle}"
                     Margin="0,0,5,0"
                     Click="TestButton_Click"/>
             <Button x:Name="SaveButton" 
-                    Content="저장" 
+                    Content="{DynamicResource Save}" 
                     Style="{StaticResource SaveButtonStyle}"
                     Click="SaveButton_Click"/>
         </StackPanel>

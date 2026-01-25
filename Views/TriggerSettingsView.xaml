@@ -44,7 +44,7 @@
 
         <!-- 제목 -->
         <TextBlock Grid.Row="0" 
-                   Text="프로그램 감지 설정" 
+                   Text="{DynamicResource TriggerSettings_Title}" 
                    FontSize="22" 
                    FontWeight="Bold" 
                    Foreground="#212529"
@@ -66,17 +66,15 @@
                             CornerRadius="3"
                             Margin="0,0,0,20">
                         <StackPanel>
-                            <TextBlock Text="ℹ️ 프로그램 감지 실행" 
+                            <TextBlock Text="{DynamicResource TriggerSettings_InfoTitle}" 
                                        FontWeight="Bold"
                                        Foreground="#004085"
                                        Margin="0,0,0,10"
                                        FontSize="14"/>
                             <TextBlock TextWrapping="Wrap" 
                                        Foreground="#004085"
-                                       FontSize="13">
-                                <Run Text="네트워크 연결 실행 완료 후, 지정한 프로그램을 감지하여"/><LineBreak/>
-                                <Run Text="프로그램 감지 실행 모드 프로그램을 자동으로 실행합니다."/>
-                            </TextBlock>
+                                       FontSize="13"
+                                       Text="{DynamicResource TriggerSettings_InfoText}"/>
                         </StackPanel>
                     </Border>
 
@@ -87,7 +85,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="감시할 프로그램:" 
+                                   Text="{DynamicResource TriggerSettings_TargetProcess}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Top"
@@ -99,7 +97,7 @@
                                      AcceptsReturn="True"
                                      VerticalScrollBarVisibility="Auto"
                                      Padding="5"/>
-                            <TextBlock Text="* 한 줄에 하나씩 프로세스 이름 입력 (확장자 제외)" 
+                            <TextBlock Text="{DynamicResource TriggerSettings_ProcessHint}" 
                                        FontSize="11" 
                                        Foreground="#6C757D"
                                        Margin="0,5,0,0"/>
@@ -113,7 +111,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="체크 주기 (초):" 
+                                   Text="{DynamicResource TriggerSettings_CheckInterval}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
@@ -131,13 +129,13 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
-                                   Text="자동 실행:" 
+                                   Text="{DynamicResource TriggerSettings_AutoRun}" 
                                    FontSize="14" 
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"/>
                         <CheckBox Grid.Column="1" 
                                   x:Name="AutoStartCheckBox"
-                                  Content="프로그램 감지 시 자동으로 프로그램 감지 실행 모드 프로그램 실행"
+                                  Content="{DynamicResource TriggerSettings_AutoRunDesc}"
                                   VerticalAlignment="Center"
                                   FontSize="13"/>
                     </Grid>
@@ -150,22 +148,14 @@
                             CornerRadius="3"
                             Margin="0,15,0,0">
                         <StackPanel>
-                            <TextBlock Text="💡 프로그램 감지 방법" 
+                            <TextBlock Text="{DynamicResource TriggerSettings_HelpTitle}" 
                                        FontWeight="Bold"
                                        Foreground="#856404"
                                        Margin="0,0,0,5"/>
                             <TextBlock TextWrapping="Wrap" 
                                        Foreground="#856404"
-                                       FontSize="12">
-                                <Run Text="• 지정한 프로그램이 실행되면 자동으로 프로그램 감지 실행 모드 프로그램을 실행합니다."/><LineBreak/>
-                                <Run Text="• 프로세스 이름은 확장자를 제외하고 입력하세요."/><LineBreak/>
-                                <Run Text="  (예: FACTOVA.SFC.MainFrame.exe → FACTOVA.SFC.MainFrame)"/><LineBreak/>
-                                <Run Text="• 여러 프로세스 중 하나라도 실행되면 감지됩니다."/><LineBreak/><LineBreak/>
-                                <Run Text="예시 프로세스 이름:"/><LineBreak/>
-                                <Run Text="FACTOVA.SFC.MainFrame"/><LineBreak/>
-                                <Run Text="notepad"/><LineBreak/>
-                                <Run Text="chrome"/>
-                            </TextBlock>
+                                       FontSize="12"
+                                       Text="{DynamicResource TriggerSettings_HelpText}"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -178,7 +168,7 @@
                     HorizontalAlignment="Right"
                     Margin="0,10,0,0">
             <Button x:Name="SaveButton" 
-                    Content="저장" 
+                    Content="{DynamicResource Save}" 
                     Style="{StaticResource SaveButtonStyle}"
                     Click="SaveButton_Click"/>
         </StackPanel>
