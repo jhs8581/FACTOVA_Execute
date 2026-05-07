@@ -8,11 +8,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <!-- 드래그 중인 버튼 스타일 -->
-        <Style x:Key="DraggingButtonStyle" TargetType="Button" BasedOn="{StaticResource LauncherButtonStyle}">
-            <Setter Property="Opacity" Value="0.5"/>
-        </Style>
-        
         <!-- 런처 버튼 스타일 -->
         <Style x:Key="LauncherButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="White"/>
@@ -62,7 +57,12 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
+        <!-- 드래그 중인 버튼 스타일 -->
+        <Style x:Key="DraggingButtonStyle" TargetType="Button" BasedOn="{StaticResource LauncherButtonStyle}">
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+
         <!-- 시작 버튼 스타일 (녹색) -->
         <Style x:Key="StartButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#28A745"/>
