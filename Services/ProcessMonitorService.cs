@@ -55,9 +55,6 @@ namespace FACTOVA_Execute.Services
             _monitorTimer.Start();
 
             LogMessage(L("Log_ProcessMonitorStarted"), LogLevel.Info);
-
-            // 즉시 한번 체크
-            Task.Run(async () => await CheckProcessAndStartPrograms(_cancellationTokenSource.Token));
         }
 
         /// <summary>
